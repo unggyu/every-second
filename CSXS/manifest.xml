@@ -33,16 +33,16 @@
                     <Menu>Every Second</Menu>
                     <Geometry>
                         <Size>
-                            <Height>580</Height>
-                            <Width>1020</Width>
+                            <Height>1020</Height>
+                            <Width>580</Width>
                         </Size>
                         <MaxSize>
-                            <Height>800</Height>
-                            <Width>1200</Width>
+                            <Height>1200</Height>
+                            <Width>800</Width>
                         </MaxSize>
                         <MinSize>
-                            <Height>400</Height>
-                            <Width>600</Width>
+                            <Height>600</Height>
+                            <Width>400</Width>
                         </MinSize>
                     </Geometry>
                 </UI>
