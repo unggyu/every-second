@@ -32,8 +32,8 @@ $.scripts = {
 }
 
 // test
-$.scripts.everySecond({
-    interval: 0.1,
-    numberOfClipsToMultiply: 10,
-    toEndOfTheVideo: true
-});
+// $.scripts.everySecond({
+//     interval: 0.1,
+//     numberOfClipsToMultiply: 10,
+//     toEndOfTheVideo: true
+// });
