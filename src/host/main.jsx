@@ -19,3 +19,7 @@ function test_host(obj_string) {
 	// alert(res)
 	return 'hola from extendscript ' + res.name
 }
+
+function invoke_document_worker(pluginData) {
+	return pluginData;
+}

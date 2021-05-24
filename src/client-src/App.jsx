@@ -4,31 +4,20 @@
 
 import React from 'react'
 
-import Home from './comps/Home.jsx'
-import Debug from './comps/Debug.jsx'
-import Config from './comps/Config.jsx'
-import Upload from './comps/Upload.jsx'
-import Navigator from './comps/Navigator.jsx'
-
-import purple from '@material-ui/core/colors/purple';
-import green from '@material-ui/core/colors/green';
-import indigo from '@material-ui/core/colors/indigo';
 import pink from '@material-ui/core/colors/pink';
 import red from '@material-ui/core/colors/red';
-import orange from '@material-ui/core/colors/amber';
 import cyan from '@material-ui/core/colors/cyan';
 
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 
 const theme = createMuiTheme({
     palette: {
-        type:'dark',
+        type: 'dark',
         primary: cyan,
         secondary: pink,
         error: red,
         contrastThreshold: 3,
         tonalOffset: 0.2,
-
     },
     status: {
         danger: 'orange',
@@ -37,7 +26,6 @@ const theme = createMuiTheme({
         // In Japanese the characters are usually larger.
         fontSize: 12,
     },
-
 })
 
 const styles = {
@@ -59,18 +47,6 @@ export default class App extends React.Component {
 
         // controller
         this._controller = props.controller
-        // navigator data
-        this.data = [
-            {title: 'Home', icon: 'home', comp: <Home onExecutePlugin={this.onExecutePlugin}/>},
-            {title: 'Upload', icon: 'cloud_upload', comp: <Upload/>},
-            {title: 'Config', icon: 'settings', comp: <Config/>},
-            {title: 'Debug', icon: 'bug_report', comp: <Debug rawLogz={this.controller.logz}/>}
-        ]
-
-    }
-
-    onNavigateChange = (index, title) => {
-        console.log(`onNavigateChange:: ${index}, ${title}`)
     }
 
     /**
@@ -99,7 +75,7 @@ export default class App extends React.Component {
         return (
             <div style={styles.root}>
                 <MuiThemeProvider theme={theme}>
-                    <Navigator data={this.data} onNavigateChange={this.onNavigateChange}/>
+                    <div></div>
                 </MuiThemeProvider>
             </div>
         )

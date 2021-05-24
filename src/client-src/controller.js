@@ -40,6 +40,7 @@ class Controller {
         if(!this.hasSession())
             return
 
+        console.log(session);
         session.invokePlugin(options)
             .then(res => console.log(res))
             .catch(err => console.log(err))
