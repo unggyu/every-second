@@ -56,5 +56,7 @@ function start_edit(args) {
 		}
 	}
 
-	return 'success edit';
+	return {
+		result: 'success'
+	};
 }

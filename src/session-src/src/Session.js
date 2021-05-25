@@ -71,10 +71,10 @@ class Session {
             scriptLoader
                 .evalScript('test_host', obj)
                 .then(res => {
-                    resolve('result is ' + res);
+                    resolve(JSON.parse(res));
                 })
                 .catch(err => {
-                    reject('test error: ' + err);
+                    reject(err);
                 });
         });
     }

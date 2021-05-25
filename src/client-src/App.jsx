@@ -81,8 +81,13 @@ export default class App extends React.Component {
     }
 
     onClickTestBtn = async () => {
-        const result = await this._controller.test();
-        console.log('App::onClickTestBtn result: ' + result);
+        try {
+            const result = await this._controller.test();
+            console.log('App::onClickTestBtn result: ' + result);
+        }
+        catch (err) {
+            console.log(err);
+        }
     }
 
     render() {
