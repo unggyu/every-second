@@ -2,6 +2,8 @@
  * @author Tomer Riko Shalev
  */
 
+import session from "../session-src/src/Session"
+
 /**
  * the main plugin session. This can enter the node modules as
  * well as the host
@@ -26,6 +28,14 @@ class Controller {
         this.log('client controller has inited')
     }
 
+    test() {
+        if (!this.hasSession()) {
+            return;
+        }
+
+        return session.test();
+    }
+
     /**
      * invoke the plugin
      *
@@ -37,15 +47,26 @@ class Controller {
         this.log('invokePlugin')
         console.log(options)
 
-        if(!this.hasSession())
-            return
+        if (!this.hasSession()) {
+            return;
+        }
 
-        console.log(session);
         session.invokePlugin(options)
             .then(res => console.log(res))
             .catch(err => console.log(err))
     }
 
+    startEdit(params) {
+        this.log('startEdit');
+
+        if (!this.hasSession()) {
+            return;
+        }
+
+        session.startEdit(params)
+            .then(res => console.log(res))
+            .catch(err => console.log(err));
+    }
 
     /**
      * get logz - get raw logz from log manager

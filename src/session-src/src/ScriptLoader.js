@@ -47,12 +47,11 @@ class ScriptLoader {
         var that = this
 
         return new Promise((resolve, reject) => {
-
             var callback = function(eval_res) {
                 // console.log('weird' + eval_res)
-                if(typeof eval_res === 'string') {
+                if (typeof eval_res === 'string') {
                     // console.log(eval_res)
-                    if(eval_res.toLowerCase().indexOf('error') != -1) {
+                    if (eval_res.toLowerCase().indexOf('error') != -1) {
                         that.log('err eval')
                         reject(that.createScriptError(eval_res))
 
@@ -66,10 +65,8 @@ class ScriptLoader {
 
                 return
             }
-
             that.cs.evalScript(eval_string, callback)
-        })
-
+        });
     }
 
     createScriptError(reason, data) {

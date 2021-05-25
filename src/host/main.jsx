@@ -9,7 +9,7 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
-#include "./JSON.jsx"
+#include "./JSON.jsx";
 
 // alert(JSON.stringify(a))
 
@@ -22,4 +22,39 @@ function test_host(obj_string) {
 
 function invoke_document_worker(pluginData) {
 	return pluginData;
+}
+
+function start_edit(args) {
+	const {
+		interval,
+		numberOfClipsToMultiply,
+		toEndOfTheVideo
+	} = JSON.parse(args);
+
+	app.enableQE();
+
+	const activeSeq = app.project.activeSequence;
+	const videoTrack = activeSeq.videoTracks[0];
+	const clip = app.project.rootItem.children[0];
+	const inconsterval = parseFloat(interval);
+	const coefficient = 254016000000;
+
+	var currentTime = interval;
+
+	if (args.toEndOfTheVideo) {
+		var currentTime = interval;
+		var endTime = activeSeq.end / coefficient;
+		for (var i = 0; currentTime < endTime; i++) {
+			activeSeq.videoTracks[i + 1].insertClip(clip, currentTime);
+			currentTime += interval;
+		}
+	}
+	else {
+		for (var i = 0; i < args.numberOfClipsToMultiply; i++) {
+			activeSeq.videoTracks[i + 1].insertClip(clip, currentTime);
+			currentTime += interval;
+		}
+	}
+
+	return 'success edit';
 }

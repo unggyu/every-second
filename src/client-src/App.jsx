@@ -4,6 +4,7 @@
 
 import React from 'react'
 
+import { Button } from '@material-ui/core';
 import pink from '@material-ui/core/colors/pink';
 import red from '@material-ui/core/colors/red';
 import cyan from '@material-ui/core/colors/cyan';
@@ -47,6 +48,7 @@ export default class App extends React.Component {
 
         // controller
         this._controller = props.controller
+        console.log(this._controller);
     }
 
     /**
@@ -70,16 +72,33 @@ export default class App extends React.Component {
         // here enable ui
     }
 
-    render() {
+    onClickEditStartBtn = () => {
+        this._controller.startEdit({
+            interval: 3,
+            numberOfClipsToMultiply: 10,
+            toEndOfTheVideo: true
+        });
+    }
 
+    onClickTestBtn = async () => {
+        const result = await this._controller.test();
+        console.log('App::onClickTestBtn result: ' + result);
+    }
+
+    render() {
         return (
             <div style={styles.root}>
                 <MuiThemeProvider theme={theme}>
-                    <div></div>
+                    <div>
+                        <Button onClick={this.onClickEditStartBtn}>
+                            StartEdit
+                        </Button>
+                        <Button onClick={this.onClickTestBtn}>
+                            Test
+                        </Button>
+                    </div>
                 </MuiThemeProvider>
             </div>
-        )
-
+        );
     }
-
 }

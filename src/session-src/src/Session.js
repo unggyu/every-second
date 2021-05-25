@@ -67,9 +67,16 @@ class Session {
             name: 'tomer'
         }
 
-        scriptLoader.evalScript('test_host', obj).then((res) => {
-            this.log('result is ' + res)
-        })
+        return new Promise((resolve, reject) => {
+            scriptLoader
+                .evalScript('test_host', obj)
+                .then(res => {
+                    resolve('result is ' + res);
+                })
+                .catch(err => {
+                    reject('test error: ' + err);
+                });
+        });
     }
 
     /**
@@ -99,17 +106,28 @@ class Session {
         var that = this
 
         return new Promise((resolve, reject) => {
+            scriptLoader
+                .evalScript('invoke_document_worker', pluginData)
+                .then((res) => {
+                    resolve(JSON.parse(res))
+                })
+                .catch(err => {
+                    reject(err)
+                });
+        });
+    }
 
-            scriptLoader.evalScript('invoke_document_worker', pluginData)
-                        .then((res) => {
-                            resolve(JSON.parse(res))
-                        })
-                        .catch(err => {
-                            reject(err)
-                        })
-
-        })
-
+    startEdit(params) {
+        return new Promise((resolve, reject) => {
+            scriptLoader
+                .evalScript('start_edit', params)
+                .then(res => {
+                    resolve(JSON.parse(res));
+                })
+                .catch(err => {
+                    reject(err);
+                });
+        });
     }
 
     /**

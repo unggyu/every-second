@@ -19,7 +19,7 @@ module.exports = ({
             exclude: /node_modules/,
             loader: "babel-loader",
             options: {
-                presets: ['env', 'react', 'stage-2']
+                presets: ['@babel/preset-env', '@babel/preset-react']
             }
 
         },
@@ -53,7 +53,7 @@ module.exports = ({
           // both options are optional https://github.com/webpack-contrib/mini-css-extract-plugin
           filename: "[name].css",
           chunkFilename: "[id].css"
-      }),
+        }),
         new HtmlWebpackPlugin({
             template: HTML_TEMPLATE_PATH,
             filename: 'index.html',
@@ -62,5 +62,4 @@ module.exports = ({
             bar: 'bar'
         })
     ]
-
 })
