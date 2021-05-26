@@ -1,20 +1,20 @@
-/**
- * @author Tomer Riko Shalev
- */
-
-import session from "../session-src/src/Session"
+import Session from '../session-src/src/Session';
 
 /**
  * the main plugin session. This can enter the node modules as
  * well as the host
  *
  */
-class Controller {
+export default class Controller {
+    static instance;
 
     constructor() {
-        //super()
+        if (Controller.instance) {
+            return Controller.instance;
+        }
 
-        this.init()
+        this.init();
+        Session.instance = this;
     }
 
     /**
@@ -22,7 +22,8 @@ class Controller {
      *
      */
     init() {
-        this.log('client controller is initing...')
+        this.log('client controller is initing...');
+        this.session = new Session();
         this.log(`do we have session ? ${this.hasSession()}`)
 
         this.log('client controller has inited')
@@ -33,7 +34,15 @@ class Controller {
             return;
         }
 
-        return session.test();
+        return this.session.test();
+    }
+
+    testWithArgs() {
+        if (!this.hasSession()) {
+            return;
+        }
+
+        return this.session.testWithArgs();
     }
 
     /**
@@ -51,7 +60,7 @@ class Controller {
             return;
         }
 
-        session.invokePlugin(options)
+        this.session.invokePlugin(options)
             .then(res => console.log(res))
             .catch(err => console.log(err))
     }
@@ -63,7 +72,7 @@ class Controller {
             return;
         }
 
-        session.startEdit(params)
+        this.session.startEdit(params)
             .then(res => console.log(res))
             .catch(err => console.log(err));
     }
@@ -77,7 +86,7 @@ class Controller {
         if(!this.hasSession())
             return []
 
-        return session.managers.log.rawLogs
+        return this.session.managers.log.rawLogs
     }
 
     /**
@@ -86,7 +95,7 @@ class Controller {
      * @return {boolean} true/false
      */
     hasSession() {
-        return window.session!==undefined
+        return window.session !== undefined
     }
 
     /**
@@ -101,9 +110,4 @@ class Controller {
     get name() {
         return 'Client Controller:: '
     }
-
 }
-
-var controller = new Controller()
-
-export default controller

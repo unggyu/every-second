@@ -1,7 +1,5 @@
-/**
- * @author Tomer Riko Shalev
- */
+import Session from './src/Session.js';
+import ScriptLoader from './src/ScriptLoader';
 
-import session from './src/Session.js'
-
-window.session = session
+window.session = new Session();
+window.scriptLoader = new ScriptLoader();

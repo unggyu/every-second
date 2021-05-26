@@ -1,7 +1,7 @@
 /**************************************************************************************************
 *
 * ADOBE SYSTEMS INCORPORATED
-* Copyright 2013 Adobe Systems Incorporated
+* Copyright 2020 Adobe Systems Incorporated
 * All Rights Reserved.
 *
 * NOTICE:  Adobe permits you to use, modify, and distribute this file in accordance with the
@@ -11,7 +11,7 @@
 *
 **************************************************************************************************/
 
-/** CSInterface - v8.0.0 */
+/** CSInterface - v10.0.0 */
 
 /**
  * Stores constants for the window types supported by the CSXS infrastructure.
@@ -381,7 +381,7 @@ function HostCapabilities(EXTENDED_PANEL_MENU, EXTENDED_PANEL_ICONS, DELEGATE_AP
     this.EXTENDED_PANEL_ICONS = EXTENDED_PANEL_ICONS;
     this.DELEGATE_APE_ENGINE = DELEGATE_APE_ENGINE;
     this.SUPPORT_HTML_EXTENSIONS = SUPPORT_HTML_EXTENSIONS;
-	this.DISABLE_FLASH_EXTENSIONS = DISABLE_FLASH_EXTENSIONS; // Since 5.0.0
+    this.DISABLE_FLASH_EXTENSIONS = DISABLE_FLASH_EXTENSIONS; // Since 5.0.0
 }
 
 /**
@@ -410,16 +410,16 @@ function ApiVersion(major, minor, micro)
  * Since 5.2.0
  *
  * @param menuItemLabel  The menu item label.
- * @param enabled  		 True if user wants to enable the menu item.
- * @param checked  		 True if user wants to check the menu item.
+ * @param enabled        True if user wants to enable the menu item.
+ * @param checked        True if user wants to check the menu item.
  *
  * @return MenuItemStatus object.
  */
 function MenuItemStatus(menuItemLabel, enabled, checked)
 {
-	this.menuItemLabel = menuItemLabel;
-	this.enabled = enabled;
-	this.checked = checked;
+    this.menuItemLabel = menuItemLabel;
+    this.enabled = enabled;
+    this.checked = checked;
 }
 
 /**
@@ -429,16 +429,16 @@ function MenuItemStatus(menuItemLabel, enabled, checked)
  * Since 5.2.0
  *
  * @param menuItemID     The menu item id.
- * @param enabled  		 True if user wants to enable the menu item.
- * @param checked  		 True if user wants to check the menu item.
+ * @param enabled        True if user wants to enable the menu item.
+ * @param checked        True if user wants to check the menu item.
  *
  * @return MenuItemStatus object.
  */
 function ContextMenuItemStatus(menuItemID, enabled, checked)
 {
-	this.menuItemID = menuItemID;
-	this.enabled = enabled;
-	this.checked = checked;
+    this.menuItemID = menuItemID;
+    this.enabled = enabled;
+    this.checked = checked;
 }
 //------------------------------ CSInterface ----------------------------------
 
@@ -488,6 +488,89 @@ CSInterface.prototype.getHostEnvironment = function()
 {
     this.hostEnvironment = JSON.parse(window.__adobe_cep__.getHostEnvironment());
     return this.hostEnvironment;
+};
+
+/** Loads binary file created which is located at url asynchronously
+*
+*@param urlName url at which binary file is located. Local files should start with 'file://'
+*@param callback Optional. A callback function that returns after binary is loaded
+
+*@example
+* To create JS binary use command ./cep_compiler test.js test.bin
+* To load JS binary asyncronously
+*   var CSLib = new CSInterface();
+*   CSLib.loadBinAsync(url, function () { });
+*/
+CSInterface.prototype.loadBinAsync = function(urlName,callback)
+{
+    try
+    {
+        var xhr = new XMLHttpRequest();
+        xhr.responseType = 'arraybuffer'; // make response as ArrayBuffer
+        xhr.open('GET', urlName, true);
+        xhr.onerror = function ()
+        {
+  		  console.log("Unable to load snapshot from given URL");
+  		  return false;
+		};
+        xhr.send();
+        xhr.onload = () => {
+            window.__adobe_cep__.loadSnapshot(xhr.response);
+            if (typeof callback === "function")
+            {
+                callback();
+            }
+            else if(typeof callback !== "undefined")
+            {
+                console.log("Provided callback is not a function");
+            }
+        }
+    }
+    catch(err)
+    {
+        console.log(err);
+        return false;
+    }
+
+	return true;
+};
+
+/** Loads binary file created synchronously
+*
+*@param pathName the local path at which binary file is located
+
+*@example
+* To create JS binary use command ./cep_compiler test.js test.bin
+* To load JS binary syncronously
+*   var CSLib = new CSInterface();
+*   CSLib.loadBinSync(path);
+*/
+CSInterface.prototype.loadBinSync  = function(pathName)
+{
+    try
+    {
+        var OSVersion = this.getOSInformation();
+        if(pathName.startsWith("file://"))
+        {
+            if (OSVersion.indexOf("Windows") >= 0)
+            {
+               pathName = pathName.replace("file:///", "");
+            }
+            else if (OSVersion.indexOf("Mac") >= 0)
+            {
+                pathName = pathName.replace("file://", "");
+            }
+            window.__adobe_cep__.loadSnapshot(pathName);
+            return true;
+        }
+    }
+    catch(err)
+    {
+        console.log(err);
+        return false;
+    }
+    //control should not come here
+    return false;
 };
 
 /** Closes this extension. */
@@ -847,6 +930,21 @@ CSInterface.prototype.getScaleFactor = function()
 };
 
 /**
+ * Retrieves the scale factor of Monitor.
+ *
+ * Since 8.5.0
+ *
+ * @return value >= 1.0f
+ * only available for windows machine
+ */
+ if(navigator.appVersion.toLowerCase().indexOf("windows") >= 0) {
+    CSInterface.prototype.getMonitorScaleFactor = function()
+    {
+        return window.__adobe_cep__.getMonitorScaleFactor();
+    };
+}
+
+/**
  * Set a handler to detect any changes of scale factor. This only works on Mac.
  *
  * Since 4.2.0
@@ -907,7 +1005,7 @@ CSInterface.prototype.setPanelFlyoutMenu = function(menu)
         return;
     }
 
-	window.__adobe_cep__.invokeSync("setPanelFlyoutMenu", menu);
+    window.__adobe_cep__.invokeSync("setPanelFlyoutMenu", menu);
 };
 
 /**
@@ -916,9 +1014,9 @@ CSInterface.prototype.setPanelFlyoutMenu = function(menu)
  *
  * Since 5.2.0
  *
- * @param menuItemLabel	The menu item label.
- * @param enabled		True to enable the item, false to disable it (gray it out).
- * @param checked		True to select the item, false to deselect it.
+ * @param menuItemLabel The menu item label.
+ * @param enabled       True to enable the item, false to disable it (gray it out).
+ * @param checked       True to select the item, false to deselect it.
  *
  * @return false when the host application does not support this functionality (HostCapabilities.EXTENDED_PANEL_MENU is false).
  *         Fails silently if menu label is invalid.
@@ -927,13 +1025,13 @@ CSInterface.prototype.setPanelFlyoutMenu = function(menu)
  */
 CSInterface.prototype.updatePanelMenuItem = function(menuItemLabel, enabled, checked)
 {
-	var ret = false;
-	if (this.getHostCapabilities().EXTENDED_PANEL_MENU)
-	{
-		var itemStatus = new MenuItemStatus(menuItemLabel, enabled, checked);
-		ret = window.__adobe_cep__.invokeSync("updatePanelMenuItem", JSON.stringify(itemStatus));
-	}
-	return ret;
+    var ret = false;
+    if (this.getHostCapabilities().EXTENDED_PANEL_MENU)
+    {
+        var itemStatus = new MenuItemStatus(menuItemLabel, enabled, checked);
+        ret = window.__adobe_cep__.invokeSync("updatePanelMenuItem", JSON.stringify(itemStatus));
+    }
+    return ret;
 };
 
 
@@ -974,7 +1072,7 @@ CSInterface.prototype.setContextMenu = function(menu, callback)
         return;
     }
 
-	window.__adobe_cep__.invokeAsync("setContextMenu", menu, callback);
+    window.__adobe_cep__.invokeAsync("setContextMenu", menu, callback);
 };
 
 /**
@@ -1053,7 +1151,7 @@ CSInterface.prototype.setContextMenuByJSON = function(menu, callback)
         return;
     }
 
-	window.__adobe_cep__.invokeAsync("setContextMenuByJSON", menu, callback);
+    window.__adobe_cep__.invokeAsync("setContextMenuByJSON", menu, callback);
 };
 
 /**
@@ -1061,14 +1159,14 @@ CSInterface.prototype.setContextMenuByJSON = function(menu, callback)
  *
  * Since 5.2.0
  *
- * @param menuItemID	The menu item ID.
- * @param enabled		True to enable the item, false to disable it (gray it out).
- * @param checked		True to select the item, false to deselect it.
+ * @param menuItemID    The menu item ID.
+ * @param enabled       True to enable the item, false to disable it (gray it out).
+ * @param checked       True to select the item, false to deselect it.
  */
 CSInterface.prototype.updateContextMenuItem = function(menuItemID, enabled, checked)
 {
-	var itemStatus = new ContextMenuItemStatus(menuItemID, enabled, checked);
-	ret = window.__adobe_cep__.invokeSync("updateContextMenuItem", JSON.stringify(itemStatus));
+    var itemStatus = new ContextMenuItemStatus(menuItemID, enabled, checked);
+    ret = window.__adobe_cep__.invokeSync("updateContextMenuItem", JSON.stringify(itemStatus));
 };
 
 /**
@@ -1080,7 +1178,7 @@ CSInterface.prototype.updateContextMenuItem = function(menuItemID, enabled, chec
  */
 CSInterface.prototype.isWindowVisible = function()
 {
-	return window.__adobe_cep__.invokeSync("isWindowVisible", "");
+    return window.__adobe_cep__.invokeSync("isWindowVisible", "");
 };
 
 /**

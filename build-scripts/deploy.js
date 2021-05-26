@@ -91,9 +91,11 @@ function deployDevMode() {
         if (isWindows) {
             execSync('REG ADD HKEY_CURRENT_USER\\Software\\Adobe\\CSXS.8 /v PlayerDebugMode /t REG_SZ /d 1 /f') // CC 2018
             execSync('REG ADD HKEY_CURRENT_USER\\Software\\Adobe\\CSXS.9 /v PlayerDebugMode /t REG_SZ /d 1 /f') // CC 2019 & 2020
+            execSync('REG ADD HKEY_CURRENT_USER\\Software\\Adobe\\CSXS.10 /v PlayerDebugMode /t REG_SZ /d 1 /f') // CC 2021
         } else {
             execSync('defaults write com.adobe.CSXS.8 PlayerDebugMode 1', { stdio: [0, 1, 2] }) // CC 2018
             execSync('defaults write com.adobe.CSXS.9 PlayerDebugMode 1', { stdio: [0, 1, 2] }) // CC 2019 & 2020
+            execSync('defaults write com.adobe.CSXS.10 PlayerDebugMode 1', { stdio: [0, 1, 2] }) // CC 2021
         }
     } catch(err) {
         utils.log_error(err)

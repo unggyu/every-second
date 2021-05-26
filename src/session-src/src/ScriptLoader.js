@@ -1,15 +1,18 @@
-/**
- * @author Tomer Riko Shalev
- */
+import path from 'path';
 
 /**
  * load jsx scripts dynamically
  */
-class ScriptLoader {
-    EvalScript_ErrMessage = "EvalScript error."
+export default class ScriptLoader {
+    static instance;
 
     constructor() {
-        this.cs = new CSInterface()
+        if (ScriptLoader.instance) {
+            return ScriptLoader.instance;
+        }
+
+        this.cs = new CSInterface();
+        ScriptLoader.instance = this;
     }
 
     get cs() {
@@ -20,6 +23,11 @@ class ScriptLoader {
         this._cs = val
     }
 
+    loadLibraries() {
+        var libPath = path.join(this.cs.getSystemPath(SystemPath.EXTENSION), 'lib');
+        this.evalScript('$._ext.evalFile', path.join(libPath, 'json3.min.js'));
+    }
+
     /**
      * loadJSX - load a jsx file dynamically, this
      * will also load all of it's includes which is desirable
@@ -28,10 +36,12 @@ class ScriptLoader {
      * @return {type}          description
      */
     loadJSX(fileName) {
-        var cs = this.cs
-        var extensionRoot = cs.getSystemPath(SystemPath.EXTENSION) + "/host/";
+        var extensionRoot = path.join(this.cs.getSystemPath(SystemPath.EXTENSION), 'host');
 
-        cs.evalScript('$.evalFile("' + extensionRoot + fileName + '")');
+        console.log('extensionRoot: ' + extensionRoot);
+        this.evalScript('$._ext.evalFile', path.join(extensionRoot, fileName))
+            .then(res => console.log(res))
+            .catch(err => console.log(err));
     }
 
     /**
@@ -42,35 +52,40 @@ class ScriptLoader {
      * @return {Promise} a promise
      */
     evalScript(functionName, params) {
-        var params_string = params ? JSON.stringify(params) : ''
-        var eval_string = `${functionName}('${params_string}')`
-        var that = this
+        var paramsString = this.evalScriptParamsToString(params);
+        var evalString = `${functionName}(${paramsString})`;
+        console.log(`${this.name} evalString: ` + evalString);
 
         return new Promise((resolve, reject) => {
-            var callback = function(eval_res) {
-                // console.log('weird' + eval_res)
-                if (typeof eval_res === 'string') {
-                    // console.log(eval_res)
-                    if (eval_res.toLowerCase().indexOf('error') != -1) {
-                        that.log('err eval')
-                        reject(that.createScriptError(eval_res))
-
-                        return
+            this.cs.evalScript(evalString, res => {
+                if (typeof res === 'string' && res.toLowerCase().indexOf('error') != -1) {
+                    this.log('err eval');
+                    if (this.isJson(res)) {
+                        reject(JSON.parse(res));
                     }
+                    reject(res);
+                } else {
+                    this.log('success eval');
+                    resolve(res);
                 }
-
-                that.log('success eval')
-
-                resolve(eval_res)
-
-                return
-            }
-            that.cs.evalScript(eval_string, callback)
+            });
         });
     }
 
-    createScriptError(reason, data) {
-        return {reason, data}
+    evalScriptParamsToString(params) {
+        return typeof params === 'undefined' ?
+            '' : typeof params !== 'string' ?
+                `"${encodeURIComponent(JSON.stringify(params))}"` : `"${encodeURIComponent(params)}"`;
+    }
+
+    isJson(str) {
+        try {
+            JSON.parse(str);
+        } catch (err) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -79,15 +94,10 @@ class ScriptLoader {
      * @param  {string} val what to log
      */
     log(val) {
-        console.log(`${this.name} ${val}`)
+        console.log(`${this.name} ${val}`);
     }
 
     get name() {
-        return 'ScriptLoader:: '
+        return 'ScriptLoader:: ';
     }
-
 }
-
-var scriptLoader = new ScriptLoader()
-
-export default scriptLoader

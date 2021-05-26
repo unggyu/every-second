@@ -1,23 +1,22 @@
-/**
- * @author Tomer Riko Shalev
- */
+// import EventEmitter from 'events'
+import ScriptLoader from './ScriptLoader';
+import DataManagers from './managers/DataManagers';
 
-import EventEmitter from 'events'
-import scriptLoader from './ScriptLoader'
-import DataManagers from './managers/DataManagers.js'
 /**
  * the main plugin session. This can enter the node modules as
  * well as the host
  *
  */
-class Session {
-
-    _managers = new DataManagers()
+export default class Session {
+    static instance;
 
     constructor() {
-        //super()
+        if (Session.instance) {
+            return Session.instance;
+        }
 
-        this.init()
+        this.init();
+        Session.instance = this;
     }
 
     /**
@@ -26,18 +25,24 @@ class Session {
      */
     init() {
         // init before everything so I can intercept console.log
-        this._managers.init()
-        this.log('session is initing...')
+        this.log('session is initing...');
+        this._managers = new DataManagers();
+        this._managers.init();
+        this.scriptLoader = new ScriptLoader();
+        // load libraries
+        // this.log('loading libraries');
+        // this.scriptLoader.loadLibraries();
         // load jsx file dynamically
-        this.log('loading the main jsx file')
-        scriptLoader.loadJSX('main.jsx')
+        this.log('loading the main jsx file');
+        this.scriptLoader.loadJSX('main.jsx');
 
-        // some testing
-        this.test()
+
+        // some testWithArgsing
+        this.test();
         // var fs = require('fs-extra')
         //console.log(fs)
 
-        this.log('session is inited')
+        this.log('session is inited');
     }
 
 
@@ -55,28 +60,23 @@ class Session {
      *
      */
     scriptLoader() {
-        return scriptLoader
+        return this.scriptLoader
+    }
+
+    test() {
+        return this.scriptLoader.evalScript('test_host');
     }
 
     /**
-     * test - let's test things
+     * testWithArgs - let's testWithArgs things
      *
      */
-    test() {
+    testWithArgs() {
         var obj = {
             name: 'tomer'
         }
 
-        return new Promise((resolve, reject) => {
-            scriptLoader
-                .evalScript('test_host', obj)
-                .then(res => {
-                    resolve(JSON.parse(res));
-                })
-                .catch(err => {
-                    reject(err);
-                });
-        });
+        return this.scriptLoader.evalScript('test_host_with_args', obj)
     }
 
     /**
@@ -106,7 +106,7 @@ class Session {
         var that = this
 
         return new Promise((resolve, reject) => {
-            scriptLoader
+            this.scriptLoader
                 .evalScript('invoke_document_worker', pluginData)
                 .then((res) => {
                     resolve(JSON.parse(res))
@@ -119,7 +119,7 @@ class Session {
 
     startEdit(params) {
         return new Promise((resolve, reject) => {
-            scriptLoader
+            this.scriptLoader
                 .evalScript('start_edit', params)
                 .then(res => {
                     resolve(JSON.parse(res));
@@ -142,9 +142,4 @@ class Session {
     get name() {
         return 'Session:: '
     }
-
 }
-
-var session = new Session()
-
-export default session

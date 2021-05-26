@@ -1,15 +1,11 @@
-/**
- * @author Tomer Riko Shalev
- */
-
-import React from 'react'
+import React from 'react';
 
 import { Button } from '@material-ui/core';
 import pink from '@material-ui/core/colors/pink';
 import red from '@material-ui/core/colors/red';
 import cyan from '@material-ui/core/colors/cyan';
 
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
     palette: {
@@ -79,13 +75,21 @@ export default class App extends React.Component {
             toEndOfTheVideo: true
         });
     }
-
+    
     onClickTestBtn = async () => {
         try {
             const result = await this._controller.test();
             console.log('App::onClickTestBtn result: ' + result);
+        } catch (err) {
+            console.log(err);
         }
-        catch (err) {
+    }
+
+    onClickTestWithArgsBtn = async () => {
+        try {
+            const result = await this._controller.testWithArgs();
+            console.log('App::onClickTestWithArgsBtn result: ' + result);
+        } catch (err) {
             console.log(err);
         }
     }
@@ -100,6 +104,9 @@ export default class App extends React.Component {
                         </Button>
                         <Button onClick={this.onClickTestBtn}>
                             Test
+                        </Button>
+                        <Button onClick={this.onClickTestWithArgsBtn}>
+                            Test With Args
                         </Button>
                     </div>
                 </MuiThemeProvider>

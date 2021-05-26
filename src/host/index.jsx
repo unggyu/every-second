@@ -1,12 +1,21 @@
-if(typeof($)=='undefined')
-	$={}
+if (typeof($) == 'undefined') {
+	$ = {};
+}
 
 $._ext = {
     //Evaluate a file and catch the exception.
-    evalFile : function(path) {
+    evalFile: function(path) {
+		var result = {};
         try {
+			path = decodeURIComponent(path);
             $.evalFile(path);
-        } catch (e) {alert("Exception:" + e)}
+			result.status = 'success';
+        } catch (err) {
+			result.status = 'failure';
+			result.error = err;
+		}
+
+		return JSON.stringify(result);
     },
     // Evaluate all the files in the given folder
     evalFiles: function(jsxFolderPath) {
@@ -18,8 +27,38 @@ $._ext = {
                 $._ext.evalFile(jsxFile)
             }
         }
-    }
-}
+    },
+    // entry-point function to call scripts more easily & reliably
+	callScript: function(dataStr) {
+		try {
+			var dataObj = JSON.parse(decodeURIComponent(dataStr));
+			if (
+				!dataObj ||
+				!dataObj.namespace ||
+				!dataObj.scriptName ||
+				!dataObj.args
+			) {
+				throw new Error('Did not provide all needed info to callScript!');
+			}
+			// call the specified jsx-function
+			var result = $[dataObj.namespace][dataObj.scriptName].apply(
+				null,
+				dataObj.args
+			);
+			// build the payload-object to return
+			var payload = {
+				err: 0,
+				result: result
+			};
+			return encodeURIComponent(JSON.stringify(payload));
+		} catch (err) {
+			var payload = {
+				err: err
+			};
+			return encodeURIComponent(JSON.stringify(payload));
+		}
+	}
+};
 
 // // fileName is a String (with the .jsx extension included)
 // function loadJSX(fileName) {
