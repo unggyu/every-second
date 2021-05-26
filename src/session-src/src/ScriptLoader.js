@@ -23,11 +23,6 @@ export default class ScriptLoader {
         this._cs = val
     }
 
-    loadLibraries() {
-        var libPath = path.join(this.cs.getSystemPath(SystemPath.EXTENSION), 'lib');
-        this.evalScript('$._ext.evalFile', path.join(libPath, 'json3.min.js'));
-    }
-
     /**
      * loadJSX - load a jsx file dynamically, this
      * will also load all of it's includes which is desirable
@@ -38,10 +33,9 @@ export default class ScriptLoader {
     loadJSX(fileName) {
         var extensionRoot = path.join(this.cs.getSystemPath(SystemPath.EXTENSION), 'host');
 
-        console.log('extensionRoot: ' + extensionRoot);
         this.evalScript('$._ext.evalFile', path.join(extensionRoot, fileName))
-            .then(res => console.log(res))
-            .catch(err => console.log(err));
+            .then(res => console.log(JSON.parse(res)))
+            .catch(err => console.log(JSON.parse(err)));
     }
 
     /**
@@ -58,6 +52,7 @@ export default class ScriptLoader {
 
         return new Promise((resolve, reject) => {
             this.cs.evalScript(evalString, res => {
+                res = decodeURIComponent(res);
                 if (typeof res === 'string' && res.toLowerCase().indexOf('error') != -1) {
                     this.log('err eval');
                     if (this.isJson(res)) {

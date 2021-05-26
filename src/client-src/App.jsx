@@ -56,24 +56,17 @@ export default class App extends React.Component {
         return this._controller
     }
 
-    /**
-     * execute the plugin
-     *
-     * @param  {type} options description
-     */
-    onExecutePlugin = (options) => {
-        console.log('App:: onExecutePlugin')
-        // here disable UI
-        this._controller.invokePlugin(options)
-        // here enable ui
-    }
-
-    onClickEditStartBtn = () => {
-        this._controller.startEdit({
-            interval: 3,
-            numberOfClipsToMultiply: 10,
-            toEndOfTheVideo: true
-        });
+    onClickEditStartBtn = async () => {
+        try {
+            const result = await this._controller.startEdit({
+                interval: 3,
+                numberOfClipsToMultiply: 10,
+                toEndOfTheVideo: true
+            });
+            console.log(result);
+        } catch (err) {
+            console.log(err);
+        }
     }
     
     onClickTestBtn = async () => {

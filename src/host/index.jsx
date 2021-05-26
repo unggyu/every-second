@@ -5,17 +5,17 @@ if (typeof($) == 'undefined') {
 $._ext = {
     //Evaluate a file and catch the exception.
     evalFile: function(path) {
-		var result = {};
+		var payload = {};
         try {
 			path = decodeURIComponent(path);
             $.evalFile(path);
-			result.status = 'success';
+			payload.result = 'success';
         } catch (err) {
-			result.status = 'failure';
-			result.error = err;
+			payload.result = 'failure';
+			payload.error = err;
 		}
 
-		return JSON.stringify(result);
+		return encodeURIComponent(JSON.stringify(payload));
     },
     // Evaluate all the files in the given folder
     evalFiles: function(jsxFolderPath) {

@@ -19,6 +19,19 @@ export default class Session {
         Session.instance = this;
     }
 
+    get name() {
+        return 'Session:: ';
+    }
+
+    /**
+     * get data managers
+     *
+     * @return {type}  description
+     */
+    get managers() {
+        return this._managers;
+    }
+
     /**
      * init - session
      *
@@ -29,9 +42,6 @@ export default class Session {
         this._managers = new DataManagers();
         this._managers.init();
         this.scriptLoader = new ScriptLoader();
-        // load libraries
-        // this.log('loading libraries');
-        // this.scriptLoader.loadLibraries();
         // load jsx file dynamically
         this.log('loading the main jsx file');
         this.scriptLoader.loadJSX('main.jsx');
@@ -45,26 +55,8 @@ export default class Session {
         this.log('session is inited');
     }
 
-
-    /**
-     * get data managers
-     *
-     * @return {type}  description
-     */
-    get managers() {
-        return this._managers
-    }
-
-    /**
-     * scriptLoader - get the script loader
-     *
-     */
-    scriptLoader() {
-        return this.scriptLoader
-    }
-
     test() {
-        return this.scriptLoader.evalScript('test_host');
+        return this.scriptLoader.evalScript('$._ES_.test_host');
     }
 
     /**
@@ -76,58 +68,11 @@ export default class Session {
             name: 'tomer'
         }
 
-        return this.scriptLoader.evalScript('test_host_with_args', obj)
-    }
-
-    /**
-     * invoke the plugin
-     *
-     * @param  {{textures:boolean, masks:boolean, info: boolean, flatten:boolean}} options for plugin
-     *
-     * @return {object} describes how well the execution of plugin was
-     */
-    invokePlugin(options) {
-        const { folderPath, isFlattenChecked,
-                isInfoChecked, isInspectVisibleChecked,
-                isMasksChecked, isTexturesChecked,
-                isMeaningfulNamesChecked, isHierarchicalChecked} = options
-
-        // i reparse everything to detect failures
-        const pluginData = {
-            destinationFolder: folderPath,
-            exportInfoJson: isInfoChecked,
-            inspectOnlyVisibleLayers: isInspectVisibleChecked,
-            exportMasks: isMasksChecked,
-            exportTextures: isTexturesChecked,
-            flatten: !isHierarchicalChecked,
-            namePrefix: isMeaningfulNamesChecked ? 'layer' : undefined
-        }
-
-        var that = this
-
-        return new Promise((resolve, reject) => {
-            this.scriptLoader
-                .evalScript('invoke_document_worker', pluginData)
-                .then((res) => {
-                    resolve(JSON.parse(res))
-                })
-                .catch(err => {
-                    reject(err)
-                });
-        });
+        return this.scriptLoader.evalScript('$._ES_.test_host_with_args', obj)
     }
 
     startEdit(params) {
-        return new Promise((resolve, reject) => {
-            this.scriptLoader
-                .evalScript('start_edit', params)
-                .then(res => {
-                    resolve(JSON.parse(res));
-                })
-                .catch(err => {
-                    reject(err);
-                });
-        });
+        return this.scriptLoader.evalScript('$._ES_.start_edit', params);
     }
 
     /**
@@ -137,9 +82,5 @@ export default class Session {
      */
     log(val) {
         console.log(`${this.name} ${val}`)
-    }
-
-    get name() {
-        return 'Session:: '
     }
 }

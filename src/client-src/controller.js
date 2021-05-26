@@ -45,26 +45,6 @@ export default class Controller {
         return this.session.testWithArgs();
     }
 
-    /**
-     * invoke the plugin
-     *
-     * @param  {{textures:boolean, masks:boolean, info: boolean, flatten:boolean}} options for plugin
-     *
-     * @return {object} describes how well the execution of plugin was
-     */
-    invokePlugin(options) {
-        this.log('invokePlugin')
-        console.log(options)
-
-        if (!this.hasSession()) {
-            return;
-        }
-
-        this.session.invokePlugin(options)
-            .then(res => console.log(res))
-            .catch(err => console.log(err))
-    }
-
     startEdit(params) {
         this.log('startEdit');
 
@@ -72,9 +52,7 @@ export default class Controller {
             return;
         }
 
-        this.session.startEdit(params)
-            .then(res => console.log(res))
-            .catch(err => console.log(err));
+        return this.session.startEdit(params);
     }
 
     /**
