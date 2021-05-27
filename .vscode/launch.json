@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "extendscript-debug",
-            "request": "launch",
-            "name": "every-second",
-            "program": "${workspaceFolder}/jsx/everysecond.jsx",
-            "stopOnEntry": false
+            "type": "chrome",
+            "request": "attach",
+            "name": "Attach to Chrome",
+            "port": 3006,
+            "webRoot": "${workspaceRoot}"
         }
     ]
 }
