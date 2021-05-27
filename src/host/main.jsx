@@ -14,7 +14,6 @@ $._ES_ = {
 			app.enableQE();
 
 			var activeSeq = app.project.activeSequence;
-			var videoTrack = activeSeq.videoTracks[0];
 			var clip = app.project.rootItem.children[0];
 			var inconsterval = parseFloat(parsedParams.interval);
 			var coefficient = 254016000000;
