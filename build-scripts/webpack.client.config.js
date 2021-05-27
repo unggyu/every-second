@@ -61,5 +61,9 @@ module.exports = ({
             title: 'HTML Webpack Plugin',
             bar: 'bar'
         })
-    ]
-})
+    ],
+    stats: {
+        preset: 'minimal',
+        chunks: true
+    }
+});

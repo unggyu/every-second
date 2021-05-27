@@ -2,6 +2,8 @@
 import ScriptLoader from './ScriptLoader';
 import DataManagers from './managers/DataManagers';
 
+const SCRIPT_PREFIX = '$._ES_.';
+
 /**
  * the main plugin session. This can enter the node modules as
  * well as the host
@@ -56,7 +58,7 @@ export default class Session {
     }
 
     test() {
-        return this.scriptLoader.evalScript('$._ES_.test_host');
+        return this.scriptLoader.evalScript(`${SCRIPT_PREFIX}test_host`);
     }
 
     /**
@@ -68,11 +70,11 @@ export default class Session {
             name: 'tomer'
         }
 
-        return this.scriptLoader.evalScript('$._ES_.test_host_with_args', obj)
+        return this.scriptLoader.evalScript(`${SCRIPT_PREFIX}test_host_with_args`, obj)
     }
 
     startEdit(params) {
-        return this.scriptLoader.evalScript('$._ES_.start_edit', params);
+        return this.scriptLoader.evalScript(`${SCRIPT_PREFIX}start_edit`, params);
     }
 
     /**

@@ -29,25 +29,7 @@ export default class Controller {
         this.log('client controller has inited')
     }
 
-    test() {
-        if (!this.hasSession()) {
-            return;
-        }
-
-        return this.session.test();
-    }
-
-    testWithArgs() {
-        if (!this.hasSession()) {
-            return;
-        }
-
-        return this.session.testWithArgs();
-    }
-
     startEdit(params) {
-        this.log('startEdit');
-
         if (!this.hasSession()) {
             return;
         }

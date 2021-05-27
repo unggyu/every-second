@@ -1,9 +1,8 @@
 import React from 'react';
-
-import { Button, TextField } from '@material-ui/core';
+import PropTypes from 'prop-types';
+import { Button, TextField, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 import { pink, red, cyan } from '@material-ui/core/colors';
-import { makeStyles, createStyles } from '@material-ui/core/styles';
-
+import { withStyles } from '@material-ui/core/styles';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
@@ -24,7 +23,7 @@ const theme = createMuiTheme({
     },
 });
 
-const useStyles = makeStyles(theme => createStyles({
+const styles = theme => ({
     root: {
         width: '100%',
         height: '100vh'
@@ -33,21 +32,28 @@ const useStyles = makeStyles(theme => createStyles({
         display: 'flex',
         flexDirection: 'column'
     }
-}));
+});
 
 /**
  * main app component
  *
  */
-export default class App extends React.Component {
+class App extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            interval: 1
+            interval: 1,
+            clipsToMultipy: 0,
+            toEndOfTheVideo: true
         }
+
         this._controller = props.controller;
-        this.classes = useStyles();
+        this.classes = props.classes;
+
+        this.handleIntervalChange = this.handleIntervalChange.bind(this);
+        this.handleClipsToMultipyChange = this.handleClipsToMultipyChange.bind(this);
+        this.handleToEndOfTheVideoChange = this.handleToEndOfTheVideoChange.bind(this);
     }
 
     /**
@@ -59,13 +65,13 @@ export default class App extends React.Component {
         return this._controller;
     }
 
+    removeNotNumbers(str) {
+        return str.replace(/[^0-9]/g, '');
+    }
+
     onClickEditStartBtn = async () => {
         try {
-            const result = await this._controller.startEdit({
-                interval: 3,
-                numberOfClipsToMultiply: 10,
-                toEndOfTheVideo: true
-            });
+            const result = await this._controller.startEdit(this.state);
             console.log(result);
         } catch (err) {
             console.log(err);
@@ -73,9 +79,22 @@ export default class App extends React.Component {
     }
 
     handleIntervalChange(e) {
-        const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+        const onlyNums = this.removeNotNumbers(e.target.value);
         this.setState({
             interval: onlyNums
+        });
+    }
+
+    handleClipsToMultipyChange(e) {
+        const onlyNums = this.removeNotNumbers(e.target.value);
+        this.setState({
+            clipsToMultipy: onlyNums
+        });
+    }
+
+    handleToEndOfTheVideoChange(e) {
+        this.setState({
+            toEndOfTheVideo: e.target.checked
         });
     }
 
@@ -87,7 +106,21 @@ export default class App extends React.Component {
                         <TextField
                             label="Time interval between clips (seconds)"
                             onChange={this.handleIntervalChange}
-                            value={this.state.interval}/>
+                            value={this.state.interval} />
+                        <TextField
+                            label="Number of clips to multipy"
+                            disabled={!this.state.toEndOfTheVideo}
+                            onChange={this.handleClipsToMultipyChange}
+                            value={this.state.clipsToMultipy} />
+                        <FormGroup>
+                            <FormControlLabel
+                                label="To end of the video"
+                                control={
+                                    <Checkbox
+                                        name="toEndOfTheVideo"
+                                        checked={this.state.toEndOfTheVideo}
+                                        onChange={this.handleToEndOfTheVideoChange} />} />
+                        </FormGroup>
                         <Button onClick={this.onClickEditStartBtn}>
                             StartEdit
                         </Button>
@@ -97,3 +130,10 @@ export default class App extends React.Component {
         );
     }
 }
+
+App.propTypes = {
+    controller: PropTypes.object.isRequired,
+    classes: PropTypes.object.isRequired
+}
+
+export default withStyles(styles)(App);

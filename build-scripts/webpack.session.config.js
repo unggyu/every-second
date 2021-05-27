@@ -36,5 +36,9 @@ module.exports = (env) => ({
         // new CopyWebpackPlugin([
         //   { from: path.join(SESSION_SRC_PATH, 'node_modules'), to: '../node_modules' }
         // ])
-    ]
-})
+    ],
+    stats: {
+        preset: 'normal',
+        chunks: true
+    }
+});
