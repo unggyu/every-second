@@ -1,26 +1,39 @@
 import path from 'path';
 
+declare global {
+    interface SystemPath extends Function {
+        USER_DATA: string;
+        COMMON_FILES: string;
+        MY_DOCUMENTS: string;
+        APPLICATION: string;
+        EXTENSION: string;
+        HOST_APPLICATION: string;
+    }
+
+    class CSInterface extends Function {
+        getSystemPath(path: string): string;
+        evalScript(script: string, callback: (res: string) => void): void;
+    }
+
+    const SystemPath: SystemPath;
+}
+
 /**
  * load jsx scripts dynamically
  */
 export default class ScriptLoader {
-    static instance;
+    private static instance: ScriptLoader;
+    private name: string;
+    private csInterface: CSInterface;
 
     constructor() {
         if (ScriptLoader.instance) {
             return ScriptLoader.instance;
         }
 
-        this.cs = new CSInterface();
+        this.name = 'ScriptLoader:: ';
+        this.csInterface = new CSInterface();
         ScriptLoader.instance = this;
-    }
-
-    get cs() {
-        return this._cs
-    }
-
-    set cs(val) {
-        this._cs = val
     }
 
     /**
@@ -30,34 +43,31 @@ export default class ScriptLoader {
      * @param  {type} fileName the file name
      * @return {type}          description
      */
-    loadJSX(fileName) {
-        var extensionRoot = path.join(this.cs.getSystemPath(SystemPath.EXTENSION), 'host');
+    loadJSX(fileName: string): void {
+        var extensionRoot = path.join(this.csInterface.getSystemPath(SystemPath.EXTENSION), 'host');
 
         this.evalScript('$._ext.evalFile', path.join(extensionRoot, fileName))
-            .then(res => console.log(JSON.parse(res)))
+            .then(res => console.log(JSON.parse(res as string)))
             .catch(err => console.log(JSON.parse(err)));
     }
 
     /**
      * evalScript - evaluate a JSX script
      *
-     * @param  {type} functionName the string name of the function to invoke
-     * @param  {type} params the params object
+     * @param  {string} functionName the string name of the function to invoke
+     * @param  {any} params the params object
      * @return {Promise} a promise
      */
-    evalScript(functionName, params) {
+    evalScript(functionName: string, params?: any): Promise<string> {
         var paramsString = this.evalScriptParamsToString(params);
         var evalString = `${functionName}(${paramsString})`;
-        console.log(`${this.name} evalString: ` + evalString);
+        this.log('evalString: ' + evalString);
 
         return new Promise((resolve, reject) => {
-            this.cs.evalScript(evalString, res => {
+            this.csInterface.evalScript(evalString, res => {
                 res = decodeURIComponent(res);
-                if (typeof res === 'string' && res.toLowerCase().indexOf('error') != -1) {
+                if (res.toLowerCase().indexOf('error') != -1) {
                     this.log('err eval');
-                    if (this.isJson(res)) {
-                        reject(JSON.parse(res));
-                    }
                     reject(res);
                 } else {
                     this.log('success eval');
@@ -67,20 +77,10 @@ export default class ScriptLoader {
         });
     }
 
-    evalScriptParamsToString(params) {
+    evalScriptParamsToString(params: undefined | string | object): string {
         return typeof params === 'undefined' ?
             '' : typeof params !== 'string' ?
                 `"${encodeURIComponent(JSON.stringify(params))}"` : `"${encodeURIComponent(params)}"`;
-    }
-
-    isJson(str) {
-        try {
-            JSON.parse(str);
-        } catch (err) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -88,11 +88,7 @@ export default class ScriptLoader {
      *
      * @param  {string} val what to log
      */
-    log(val) {
+    log(val: string): void {
         console.log(`${this.name} ${val}`);
-    }
-
-    get name() {
-        return 'ScriptLoader:: ';
     }
 }

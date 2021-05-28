@@ -6,7 +6,7 @@ const distFolder = path.join(pluginConfig.destinationFolder, pluginConfig.extens
 const srcFolder = pluginConfig.sourceFolder
 const SESSION_DIST_PATH = path.join(distFolder, 'session-dist')
 const SESSION_SRC_PATH = path.join(srcFolder, 'session-src')
-const ENTRY_POINT_SESSION_PATH = path.join(SESSION_SRC_PATH, 'index.js')
+const ENTRY_POINT_SESSION_PATH = path.join(SESSION_SRC_PATH, 'src/index.ts')
 
 module.exports = (env) => ({
     entry: ENTRY_POINT_SESSION_PATH,
@@ -15,7 +15,7 @@ module.exports = (env) => ({
     module: {
         rules: [
         {
-            test: /\.(js|jsx)$/,
+            test: /\.(ts|tsx)$/,
             exclude: /node_modules/,
             loader: "babel-loader",
             options: {
@@ -24,7 +24,7 @@ module.exports = (env) => ({
         }]
     },
     resolve: {
-        extensions: ['*', '.js', '.jsx']
+        extensions: ['*', '.ts', '.tsx']
     },
     output: {
         path: SESSION_DIST_PATH,

@@ -1,11 +1,12 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { Button, TextField, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 import { pink, red, cyan } from '@material-ui/core/colors';
 import { withStyles } from '@material-ui/core/styles';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { BaseCSSProperties, Styles } from '@material-ui/core/styles/withStyles';
+import { MuiThemeProvider, createMuiTheme, Theme, ThemeOptions } from '@material-ui/core/styles';
+import Controller, { EverySecondEditData } from './Controller';
 
-const theme = createMuiTheme({
+let theme: Theme = createMuiTheme({
     palette: {
         type: 'dark',
         primary: cyan,
@@ -21,9 +22,14 @@ const theme = createMuiTheme({
         // In Japanese the characters are usually larger.
         fontSize: 12,
     },
-});
+} as ThemeOptions);
 
-const styles = theme => ({
+interface StyleProps {
+    root: BaseCSSProperties,
+    flexContainer: BaseCSSProperties
+}
+
+let styles = ((theme: Theme) => ({
     root: {
         width: '100%',
         height: '100vh'
@@ -32,14 +38,30 @@ const styles = theme => ({
         display: 'flex',
         flexDirection: 'column'
     }
-});
+} as StyleProps)) as Styles<Theme, StyleProps, keyof StyleProps>;
+
+interface StylePropsClasses extends Record<keyof StyleProps, string> {}
+
+interface AppProps {
+    controller: Controller,
+    classes: StyleProps
+}
+
+interface AppState {
+    interval: number,
+    clipsToMultipy: number,
+    toEndOfTheVideo: boolean
+}
 
 /**
  * main app component
  *
  */
-class App extends React.Component {
-    constructor(props) {
+class App extends Component<AppProps, AppState> {
+    private controller: Controller;
+    private classes: StylePropsClasses;
+
+    constructor(props: AppProps) {
         super(props);
 
         this.state = {
@@ -48,30 +70,21 @@ class App extends React.Component {
             toEndOfTheVideo: true
         }
 
-        this._controller = props.controller;
-        this.classes = props.classes;
+        this.controller = props.controller;
+        this.classes = props.classes as StylePropsClasses;
 
         this.handleIntervalChange = this.handleIntervalChange.bind(this);
         this.handleClipsToMultipyChange = this.handleClipsToMultipyChange.bind(this);
         this.handleToEndOfTheVideoChange = this.handleToEndOfTheVideoChange.bind(this);
     }
 
-    /**
-     * get controller
-     *
-     * @return {Controller}
-     */
-    get controller() {
-        return this._controller;
-    }
-
-    removeNotNumbers(str) {
+    removeNotNumbers(str: string): string {
         return str.replace(/[^0-9]/g, '');
     }
 
     onClickEditStartBtn = async () => {
         try {
-            const result = await this._controller.startEdit(this.state);
+            const result = await this.controller.startEdit(this.state);
             console.log(result);
         } catch (err) {
             console.log(err);
@@ -81,14 +94,14 @@ class App extends React.Component {
     handleIntervalChange(e) {
         const onlyNums = this.removeNotNumbers(e.target.value);
         this.setState({
-            interval: onlyNums
+            interval: +onlyNums
         });
     }
 
     handleClipsToMultipyChange(e) {
         const onlyNums = this.removeNotNumbers(e.target.value);
         this.setState({
-            clipsToMultipy: onlyNums
+            clipsToMultipy: +onlyNums
         });
     }
 
@@ -129,11 +142,6 @@ class App extends React.Component {
             </div>
         );
     }
-}
-
-App.propTypes = {
-    controller: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired
 }
 
 export default withStyles(styles)(App);

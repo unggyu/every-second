@@ -1,13 +1,14 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const pluginConfig = require('../pluginrc.js')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const pluginConfig = require('../pluginrc.js');
 // const distFolder = pluginConfig.destinationFolder
-const distFolder = path.join(pluginConfig.destinationFolder, pluginConfig.extensionBundleId)
-const srcFolder = pluginConfig.sourceFolder
-const CLIENT_DIST_PATH = path.resolve(distFolder, 'client-dist')
-const HTML_TEMPLATE_PATH = path.join(srcFolder, 'client-src/index.server.template.html')
-const ENTRY_POINT_CLIENT_PATH = path.join(srcFolder, 'client-src/index.js')
+const distFolder = path.join(pluginConfig.destinationFolder, pluginConfig.extensionBundleId);
+const srcFolder = pluginConfig.sourceFolder;
+const CLIENT_DIST_PATH = path.resolve(distFolder, 'client-dist');
+const HTML_TEMPLATE_PATH = path.join(srcFolder, 'client-src/index.server.template.html');
+const ENTRY_POINT_CLIENT_PATH = path.join(srcFolder, 'client-src/src/index.ts');
 
 module.exports = ({
     entry: ENTRY_POINT_CLIENT_PATH,
@@ -15,7 +16,7 @@ module.exports = ({
     module: {
         rules: [
         {
-            test: /\.(js|jsx)$/,
+            test: /\.(ts|tsx)$/,
             exclude: /node_modules/,
             loader: "babel-loader",
             options: {
@@ -36,7 +37,7 @@ module.exports = ({
         }]
     },
     resolve: {
-        extensions: ['*', '.js', '.jsx']
+        extensions: ['*', '.ts', '.tsx']
     },
     output: {
         path: CLIENT_DIST_PATH,
@@ -60,6 +61,9 @@ module.exports = ({
             inject: 'body',
             title: 'HTML Webpack Plugin',
             bar: 'bar'
+        }),
+        new CleanWebpackPlugin({
+            cleanStaleWebpackAssets: false
         })
     ],
     stats: {
