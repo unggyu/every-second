@@ -1,37 +1,28 @@
 /**
- * @author Tomer Riko Shalev
- */
-
-
-/**
  * log management
  *
  */
 export default class LogManager {
-    _logs = []
+    private _logs: Array<object> = [];
 
-    constructor() {
+    init(): void {
+        this.log('initing...');
+        var log = console.log;
 
-    }
+        if (console === undefined) {
+            return;
+        }
 
-    init() {
-        this.log('initing...')
-
-        var log = console.log
-
-        if(console === undefined)
-            return
-        var that = this
+        var that = this;
         // override the console.log method
-        console.log = function () {
+        console.log = function (...data: any[]) {
             // log.call(this, 'My Console!!!')
             // log.apply(this, Array.prototype.slice.call(arguments))
             // retain older console.log functionality
-            log.call(this, ...arguments)
+            log.call(this, data);
             // save the log internally
-            that.addRawLog(...arguments)
+            that.addRawLog(data);
         }
-
     }
 
     /**
@@ -40,19 +31,19 @@ export default class LogManager {
      * @param  {Object} val anything
      *
      */
-    addRawLog(val) {
-        this._logs.push(val)
+    addRawLog(...val: any): void {
+        this._logs.push(val);
     }
 
-    get rawLogs() {
+    get rawLogs(): Array<object> {
         return this._logs
     }
 
-    get name() {
-        return 'LogManager:: '
+    get name(): string {
+        return 'LogManager:: ';
     }
 
-    log(val) {
-        return `${this.name} ${val}`
+    log(val: string | object): string {
+        return `${this.name} ${val}`;
     }
 }

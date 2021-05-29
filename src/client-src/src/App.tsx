@@ -1,9 +1,15 @@
-import React, { Component } from 'react';
-import { Button, TextField, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
-import { pink, red, cyan } from '@material-ui/core/colors';
-import { withStyles } from '@material-ui/core/styles';
-import { BaseCSSProperties, Styles } from '@material-ui/core/styles/withStyles';
-import { MuiThemeProvider, createMuiTheme, Theme, ThemeOptions } from '@material-ui/core/styles';
+import React, { Component, ChangeEvent } from 'react';
+import { Button, TextField, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core/index';
+import { pink, red, cyan } from '@material-ui/core/colors/index';
+import {
+    createStyles,
+    withStyles,
+    WithStyles,
+    MuiThemeProvider,
+    createMuiTheme,
+    Theme,
+    ThemeOptions
+} from '@material-ui/core/styles/index';
 import Controller, { EverySecondEditData } from './Controller';
 
 let theme: Theme = createMuiTheme({
@@ -24,12 +30,7 @@ let theme: Theme = createMuiTheme({
     },
 } as ThemeOptions);
 
-interface StyleProps {
-    root: BaseCSSProperties,
-    flexContainer: BaseCSSProperties
-}
-
-let styles = ((theme: Theme) => ({
+let styles = ((theme: Theme) => createStyles({
     root: {
         width: '100%',
         height: '100vh'
@@ -38,20 +39,13 @@ let styles = ((theme: Theme) => ({
         display: 'flex',
         flexDirection: 'column'
     }
-} as StyleProps)) as Styles<Theme, StyleProps, keyof StyleProps>;
+}));
 
-interface StylePropsClasses extends Record<keyof StyleProps, string> {}
-
-interface AppProps {
-    controller: Controller,
-    classes: StyleProps
+interface AppProps extends WithStyles<typeof styles> {
+    controller: Controller;
 }
 
-interface AppState {
-    interval: number,
-    clipsToMultipy: number,
-    toEndOfTheVideo: boolean
-}
+interface AppState extends EverySecondEditData { }
 
 /**
  * main app component
@@ -59,7 +53,7 @@ interface AppState {
  */
 class App extends Component<AppProps, AppState> {
     private controller: Controller;
-    private classes: StylePropsClasses;
+    private classes: AppProps['classes'];
 
     constructor(props: AppProps) {
         super(props);
@@ -71,7 +65,7 @@ class App extends Component<AppProps, AppState> {
         }
 
         this.controller = props.controller;
-        this.classes = props.classes as StylePropsClasses;
+        this.classes = props.classes;
 
         this.handleIntervalChange = this.handleIntervalChange.bind(this);
         this.handleClipsToMultipyChange = this.handleClipsToMultipyChange.bind(this);
@@ -82,7 +76,7 @@ class App extends Component<AppProps, AppState> {
         return str.replace(/[^0-9]/g, '');
     }
 
-    onClickEditStartBtn = async () => {
+    onClickEditStartBtn = async (): Promise<void> => {
         try {
             const result = await this.controller.startEdit(this.state);
             console.log(result);
@@ -91,21 +85,21 @@ class App extends Component<AppProps, AppState> {
         }
     }
 
-    handleIntervalChange(e) {
+    handleIntervalChange(e: ChangeEvent<HTMLInputElement>) {
         const onlyNums = this.removeNotNumbers(e.target.value);
         this.setState({
             interval: +onlyNums
         });
     }
 
-    handleClipsToMultipyChange(e) {
+    handleClipsToMultipyChange(e: ChangeEvent<HTMLInputElement>) {
         const onlyNums = this.removeNotNumbers(e.target.value);
         this.setState({
             clipsToMultipy: +onlyNums
         });
     }
 
-    handleToEndOfTheVideoChange(e) {
+    handleToEndOfTheVideoChange(e: ChangeEvent<HTMLInputElement>) {
         this.setState({
             toEndOfTheVideo: e.target.checked
         });

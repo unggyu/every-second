@@ -96,6 +96,13 @@ function resolveEnv() {
     return env
 }
 
+function mkdir(path) {
+    const isExists = fs.existsSync(path);
+    if (!isExists) {
+        fs.mkdirSync(path);
+    }
+}
+
 module.exports = {
     deleteFolderRecursive,
     copyRecursiveSync,
@@ -103,5 +110,6 @@ module.exports = {
     log_error,
     log_progress,
     resolveWindows,
-    resolveEnv
+    resolveEnv,
+    mkdir
 }

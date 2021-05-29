@@ -1,20 +1,11 @@
-/**
- * @author Tomer Riko Shalev
- */
-
-import LogManager from './LogManager.js'
+import LogManager from './LogManager';
 
 export default class DataManagers {
-    _manager_log = undefined
+    private _manager_log: LogManager;
 
-    constructor() {
-
-    }
-
-    init() {
-        this._manager_log = new LogManager()
-
-        this._manager_log.init()
+    init(): void {
+        this._manager_log = new LogManager();
+        this._manager_log.init();
     }
 
     /**
@@ -22,8 +13,7 @@ export default class DataManagers {
      *
      * @return {LogManager} the log manager
      */
-    get log() {
-        return this._manager_log
+    get log(): LogManager {
+        return this._manager_log;
     }
-
 }

@@ -18,6 +18,13 @@ class ESScripts {
     static START_EDIT: string = `${ScriptPrefixes.ES}start_edit`;
 }
 
+class ESScriptError extends Error {
+    constructor(message?: string) {
+        super(message ?? 'Every second script error.');
+        this.name = 'ESScriptError';
+    }
+}
+
 /**
  * the main plugin session. This can enter the node modules as
  * well as the host

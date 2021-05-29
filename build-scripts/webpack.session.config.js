@@ -19,12 +19,12 @@ module.exports = (env) => ({
             exclude: /node_modules/,
             loader: "babel-loader",
             options: {
-                presets: ['@babel/preset-env', '@babel/preset-react']
+                presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript']
             }
         }]
     },
     resolve: {
-        extensions: ['*', '.ts', '.tsx']
+        extensions: ['.tsx', '.ts', '.js']
     },
     output: {
         path: SESSION_DIST_PATH,

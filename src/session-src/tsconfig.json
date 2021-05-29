@@ -1,10 +1,13 @@
 {
     "compilerOptions": {
-        "lib": ["es6", "dom"],
+        "target": "es6",
+        "module": "commonjs",
+        "strict": true,
+        "strictPropertyInitialization": false,
         "noImplicitAny": true,
         "noImplicitThis": true,
         "strictNullChecks": true,
         "esModuleInterop": true
     },
-    "include": ["src/**/*"]
+    "include": ["./src/**/*"]
 }

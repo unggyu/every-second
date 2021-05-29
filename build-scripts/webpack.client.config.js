@@ -8,7 +8,7 @@ const distFolder = path.join(pluginConfig.destinationFolder, pluginConfig.extens
 const srcFolder = pluginConfig.sourceFolder;
 const CLIENT_DIST_PATH = path.resolve(distFolder, 'client-dist');
 const HTML_TEMPLATE_PATH = path.join(srcFolder, 'client-src/index.server.template.html');
-const ENTRY_POINT_CLIENT_PATH = path.join(srcFolder, 'client-src/src/index.ts');
+const ENTRY_POINT_CLIENT_PATH = path.join(srcFolder, 'client-src/src/index.tsx');
 
 module.exports = ({
     entry: ENTRY_POINT_CLIENT_PATH,
@@ -18,9 +18,9 @@ module.exports = ({
         {
             test: /\.(ts|tsx)$/,
             exclude: /node_modules/,
-            loader: "babel-loader",
+            loader: 'babel-loader',
             options: {
-                presets: ['@babel/preset-env', '@babel/preset-react']
+                presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript']
             }
 
         },
@@ -32,12 +32,12 @@ module.exports = ({
             }
         },
         {
-            test:/\.css$/,
-            use:[MiniCssExtractPlugin.loader,'css-loader']
+            test: /\.css$/,
+            use: [MiniCssExtractPlugin.loader,'css-loader']
         }]
     },
     resolve: {
-        extensions: ['*', '.ts', '.tsx']
+        extensions: ['.tsx', '.ts', '.js']
     },
     output: {
         path: CLIENT_DIST_PATH,
@@ -52,8 +52,8 @@ module.exports = ({
         new MiniCssExtractPlugin({
           // Options similar to the same options in webpackOptions.output
           // both options are optional https://github.com/webpack-contrib/mini-css-extract-plugin
-          filename: "[name].css",
-          chunkFilename: "[id].css"
+          filename: '[name].css',
+          chunkFilename: '[id].css'
         }),
         new HtmlWebpackPlugin({
             template: HTML_TEMPLATE_PATH,
