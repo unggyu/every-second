@@ -1,14 +1,20 @@
 import React, { Component, ChangeEvent } from 'react';
-import { Button, TextField, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core/index';
+import {
+    Button,
+    TextField,
+    FormGroup,
+    FormControlLabel,
+    Checkbox
+} from '@material-ui/core/index';
 import { pink, red, cyan } from '@material-ui/core/colors/index';
 import {
-    createStyles,
-    withStyles,
+    Theme,
+    ThemeOptions,
     WithStyles,
     MuiThemeProvider,
-    createMuiTheme,
-    Theme,
-    ThemeOptions
+    createStyles,
+    withStyles,
+    createMuiTheme
 } from '@material-ui/core/styles/index';
 import Controller, { EverySecondEditData } from './Controller';
 
@@ -45,7 +51,7 @@ interface AppProps extends WithStyles<typeof styles> {
     controller: Controller;
 }
 
-interface AppState extends EverySecondEditData { }
+type AppState = EverySecondEditData;
 
 /**
  * main app component

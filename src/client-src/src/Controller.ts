@@ -1,4 +1,4 @@
-import Session from '../../session-src/src/Session';
+import { Session, IStartEditParameter, IScriptResultPayload } from '../../session-src/src/index';
 
 declare global {
     interface Window {
@@ -6,11 +6,7 @@ declare global {
     }
 }
 
-export declare interface EverySecondEditData {
-    interval: number,
-    clipsToMultipy: number,
-    toEndOfTheVideo: boolean
-}
+export type EverySecondEditData = IStartEditParameter;
 
 export class SessionNotExistsError extends Error {
     public controller: Controller;
@@ -49,7 +45,7 @@ export default class Controller {
         this.log('client controller has inited')
     }
 
-    startEdit(params: EverySecondEditData): Promise<object> {
+    startEdit(params: EverySecondEditData): Promise<IScriptResultPayload | undefined> {
         if (!this.hasSession()) {
             throw new SessionNotExistsError(this);
         }

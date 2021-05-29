@@ -2,12 +2,6 @@
 import ScriptLoader from './ScriptLoader';
 import DataManagers from './managers/DataManagers';
 
-interface EverySecondEditData {
-    interval: number,
-    clipsToMultipy: number,
-    toEndOfTheVideo: boolean
-}
-
 class ScriptPrefixes {
     static ES: string = '$._ES_.';
 }
@@ -18,11 +12,55 @@ class ESScripts {
     static START_EDIT: string = `${ScriptPrefixes.ES}start_edit`;
 }
 
-class ESScriptError extends Error {
-    constructor(message?: string) {
+export class ESScriptError extends Error {
+    private script: string;
+    private innerError: string | object | undefined;
+    constructor(script: string, message?: string, innerError?: string | object) {
         super(message ?? 'Every second script error.');
         this.name = 'ESScriptError';
+        this.script = script;
+
+        if (innerError !== undefined) {
+            this.innerError = innerError;
+        }
     }
+}
+
+export interface IScriptParameter {
+
+}
+
+export interface IEverySecondScriptParameter extends IScriptParameter {
+
+}
+
+export interface ITestHostWithArgsParameter extends IEverySecondScriptParameter {
+    name: string;
+}
+
+export interface IStartEditParameter extends IEverySecondScriptParameter {
+    interval: number;
+    clipsToMultipy: number;
+    toEndOfTheVideo: boolean;
+}
+
+export interface IScriptResult {
+    data: string | object | undefined;
+}
+
+export interface IScriptResultPayload<TResult extends IScriptResult = IScriptResult> {
+    name: string | undefined;
+    status: string;
+    result: TResult | undefined;
+    error: string | object | undefined;
+}
+
+export interface IEverySecondScriptResult extends IScriptResult {
+
+}
+
+export interface ITestHostWithArgsResult extends IEverySecondScriptResult {
+    parameters: string;
 }
 
 /**
@@ -46,7 +84,7 @@ export default class Session {
         this.name = 'Session:: ';
     }
 
-    init() {
+    init(): void {
         // init before everything so I can intercept console.log
         this.log('session is initing...');
         this.managers = new DataManagers();
@@ -57,41 +95,36 @@ export default class Session {
         this.scriptLoader.loadJSX('main.jsx');
 
 
-        // some testWithArgsing
+        // some test
         this.test();
-        // var fs = require('fs-extra')
-        //console.log(fs)
 
         this.log('session is inited');
     }
 
-    test(): Promise<string> {
-        return this.scriptLoader.evalScript(ESScripts.TEST_HOST) as Promise<string>;
+    test(): Promise<IScriptResultPayload | undefined> {
+        return this.evalScript(ESScripts.TEST_HOST);
     }
 
-    /**
-     * testWithArgs - let's testWithArgs things
-     *
-     */
-    testWithArgs(): Promise<string> {
-        var obj = {
+    testWithArgs(): Promise<IScriptResultPayload<ITestHostWithArgsResult> | undefined> {
+        const args: ITestHostWithArgsParameter = {
             name: 'tomer'
         };
 
-        return this.scriptLoader.evalScript(ESScripts.TEST_HOST_WITH_ARGS, obj) as Promise<string>;
+        return this.evalScript<ITestHostWithArgsParameter, ITestHostWithArgsResult>(ESScripts.TEST_HOST_WITH_ARGS, args);
     }
 
-    async startEdit(params: EverySecondEditData): Promise<object> {
+    startEdit(params: IStartEditParameter): Promise<IScriptResultPayload | undefined> {
+        return this.evalScript(ESScripts.START_EDIT, params);
+    }
+
+    private async evalScript<TParameter extends IScriptParameter | string | undefined = IScriptParameter, TResult extends IScriptResult = IScriptResult>(functionName: string, params?: TParameter): Promise<IScriptResultPayload<TResult> | undefined> {
         try {
-            const resultStr = await this.scriptLoader.evalScript(ESScripts.START_EDIT, params);
-            return JSON.parse(resultStr);
+            const result = await this.scriptLoader.evalScript(functionName, params);
+            return JSON.parse(result) as IScriptResultPayload<TResult>;
         } catch (err) {
-            if (typeof err === 'string') {
-                return JSON.parse(err);
-            } else {
-                return {
-                    error: err
-                };
+            if (err === 'string') {
+                const errObj = JSON.parse(err) as IScriptResultPayload;
+                throw new ESScriptError(functionName, undefined, errObj.error);
             }
         }
     }
@@ -101,7 +134,7 @@ export default class Session {
      *
      * @param  {string} val what to log
      */
-    log(val: string): void {
+    private log(val: string): void {
         console.log(`${this.name} ${val}`)
     }
 }

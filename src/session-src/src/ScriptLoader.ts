@@ -40,10 +40,10 @@ export default class ScriptLoader {
      * loadJSX - load a jsx file dynamically, this
      * will also load all of it's includes which is desirable
      *
-     * @param  {type} fileName the file name
-     * @return {type}          description
+     * @param fileName the file name
+     * @return description
      */
-    loadJSX(fileName: string): void {
+    public loadJSX(fileName: string): void {
         var extensionRoot = path.join(this.csInterface.getSystemPath(SystemPath.EXTENSION), 'host');
 
         this.evalScript('$._ext.evalFile', path.join(extensionRoot, fileName))
@@ -51,14 +51,7 @@ export default class ScriptLoader {
             .catch(err => console.log(JSON.parse(err)));
     }
 
-    /**
-     * evalScript - evaluate a JSX script
-     *
-     * @param  {string} functionName the string name of the function to invoke
-     * @param  {any} params the params object
-     * @return {Promise} a promise
-     */
-    evalScript(functionName: string, params?: any): Promise<string> {
+    public async evalScript(functionName: string, params?: string | object): Promise<string> {
         var paramsString = this.evalScriptParamsToString(params);
         var evalString = `${functionName}(${paramsString})`;
         this.log('evalString: ' + evalString);
@@ -77,18 +70,22 @@ export default class ScriptLoader {
         });
     }
 
-    evalScriptParamsToString(params: undefined | string | object): string {
-        return typeof params === 'undefined' ?
-            '' : typeof params !== 'string' ?
-                `"${encodeURIComponent(JSON.stringify(params))}"` : `"${encodeURIComponent(params)}"`;
+    private evalScriptParamsToString(params: undefined | string | object): string {
+        if (typeof params === 'object') {
+            return `"${encodeURIComponent(JSON.stringify(params))}"`;
+        } else if (typeof params === 'string') {
+            return `"${encodeURIComponent(params)}"`;
+        } else {
+            return '';
+        }
     }
 
     /**
      * log some info with session prefix
      *
-     * @param  {string} val what to log
+     * @param val what to log
      */
-    log(val: string): void {
+    private log(val: string): void {
         console.log(`${this.name} ${val}`);
     }
 }
