@@ -22,7 +22,6 @@ module.exports = ({
             options: {
                 presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript']
             }
-
         },
         {
             test: /\.(woff|woff2|eot|ttf|svg)$/,
@@ -33,7 +32,15 @@ module.exports = ({
         },
         {
             test: /\.css$/,
-            use: [MiniCssExtractPlugin.loader,'css-loader']
+            use: [
+                {
+                    loader: MiniCssExtractPlugin.loader,
+                },
+                {
+                    loader: 'css-loader',
+                    options: { sourceMap: true }
+                }
+            ]
         }]
     },
     resolve: {
