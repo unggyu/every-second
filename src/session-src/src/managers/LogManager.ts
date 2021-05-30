@@ -15,23 +15,23 @@ export default class LogManager {
 
         var that = this;
         // override the console.log method
-        console.log = function (...data: any[]) {
+        console.log = function (...data: any[]): void {
             // log.call(this, 'My Console!!!')
             // log.apply(this, Array.prototype.slice.call(arguments))
             // retain older console.log functionality
-            log.call(this, data);
+            log.call(this, ...data);
             // save the log internally
-            that.addRawLog(data);
+            that.addRawLog(...data);
         }
     }
 
     /**
      * addLog - collect log
      *
-     * @param  {Object} val anything
+     * @param val anything
      *
      */
-    addRawLog(...val: any): void {
+    addRawLog(...val: object[]): void {
         this._logs.push(val);
     }
 

@@ -122,7 +122,7 @@ class App extends Component<AppProps, AppState> {
                             value={this.state.interval} />
                         <TextField
                             label="Number of clips to multipy"
-                            disabled={!this.state.toEndOfTheVideo}
+                            disabled={this.state.toEndOfTheVideo}
                             onChange={this.handleClipsToMultipyChange}
                             value={this.state.clipsToMultipy} />
                         <FormGroup>

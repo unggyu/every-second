@@ -51,7 +51,7 @@ export default class ScriptLoader {
             .catch(err => console.log(JSON.parse(err)));
     }
 
-    public async evalScript(functionName: string, params?: string | object): Promise<string> {
+    public evalScript(functionName: string, params?: string | object): Promise<string> {
         var paramsString = this.evalScriptParamsToString(params);
         var evalString = `${functionName}(${paramsString})`;
         this.log('evalString: ' + evalString);
@@ -59,12 +59,12 @@ export default class ScriptLoader {
         return new Promise((resolve, reject) => {
             this.csInterface.evalScript(evalString, res => {
                 res = decodeURIComponent(res);
-                if (res.toLowerCase().indexOf('error') != -1) {
-                    this.log('err eval');
-                    reject(res);
-                } else {
+                if (res.toLowerCase().indexOf('error') === -1) {
                     this.log('success eval');
                     resolve(res);
+                } else {
+                    this.log('err eval');
+                    reject(res);
                 }
             });
         });
