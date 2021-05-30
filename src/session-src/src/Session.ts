@@ -70,8 +70,8 @@ interface ITestHostWithArgsResult extends IEverySecondScriptResult {
  */
 class Session {
     private static instance: Session;
-    private scriptLoader: ScriptLoader;
-    private managers: DataManagers;
+    private _scriptLoader: ScriptLoader;
+    private _managers: DataManagers;
 
     constructor() {
         if (Session.instance) {
@@ -86,12 +86,20 @@ class Session {
         return 'Session:: ';
     }
 
+    get scriptLoader(): ScriptLoader {
+        return this._scriptLoader;
+    }
+
+    get managers(): DataManagers {
+        return this._managers;
+    }
+
     async init(): Promise<void> {
         // init before everything so I can intercept console.log
         this.log('session is initing...');
-        this.managers = new DataManagers();
+        this._managers = new DataManagers();
         this.managers.init();
-        this.scriptLoader = new ScriptLoader();
+        this._scriptLoader = new ScriptLoader();
         // load jsx file dynamically
         this.log('loading the main jsx file');
         await this.scriptLoader.loadJSX('main.jsx');

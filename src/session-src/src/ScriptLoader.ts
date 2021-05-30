@@ -24,7 +24,7 @@ declare global {
 class ScriptLoader {
     private static instance: ScriptLoader;
     private name: string;
-    private csInterface: CSInterface;
+    private _csInterface: CSInterface;
 
     constructor() {
         if (ScriptLoader.instance) {
@@ -32,9 +32,13 @@ class ScriptLoader {
         }
 
         this.name = 'ScriptLoader:: ';
-        this.csInterface = new CSInterface();
+        this._csInterface = new CSInterface();
 
         ScriptLoader.instance = this;
+    }
+
+    get csInterface(): CSInterface {
+        return this._csInterface;
     }
 
     /**
@@ -45,7 +49,7 @@ class ScriptLoader {
      * @return description
      */
     public async loadJSX(fileName: string): Promise<string> {
-        var extensionRoot = path.join(this.csInterface.getSystemPath(SystemPath.EXTENSION), 'host');
+        const extensionRoot = path.join(this.csInterface.getSystemPath(SystemPath.EXTENSION), 'host');
         try {
             const result = await this.evalScript('$._ext.evalFile', path.join(extensionRoot, fileName));
             console.log(JSON.parse(result));
@@ -57,9 +61,8 @@ class ScriptLoader {
     }
 
     public evalScript(functionName: string, params?: string | object): Promise<string> {
-        var paramsString = this.evalScriptParamsToString(params);
-        var evalString = `${functionName}(${paramsString})`;
-        this.log('evalString: ' + evalString);
+        const evalString = this.makeEvalString(functionName, params);
+        this.log('eval: ' + this.makeEvalString(functionName, params, false));
 
         return new Promise((resolve, reject) => {
             this.csInterface.evalScript(evalString, (res) => {
@@ -73,14 +76,27 @@ class ScriptLoader {
         });
     }
 
-    private evalScriptParamsToString(params: undefined | string | object): string {
+    private evalScriptParamsToString(params: undefined | string | object, encode: boolean = true): string {
         if (typeof params === 'object') {
-            return `"${encodeURIComponent(JSON.stringify(params))}"`;
+            if (encode) {
+                return `"${encodeURIComponent(JSON.stringify(params))}"`;
+            } else {
+                return `"${JSON.stringify(params)}"`;
+            }
         } else if (typeof params === 'string') {
-            return `"${encodeURIComponent(params)}"`;
+            if (encode) {
+                return `"${encodeURIComponent(params)}"`;
+            } else {
+                return `"${params}"`;
+            }
         } else {
             return '';
         }
+    }
+
+    private makeEvalString(functionName: string, params?: string | object, encode: boolean = true) {
+        const paramsString = this.evalScriptParamsToString(params, encode);
+        return `${functionName}(${paramsString})`;
     }
 
     /**

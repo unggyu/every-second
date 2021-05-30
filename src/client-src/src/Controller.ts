@@ -24,7 +24,7 @@ class SessionNotExistsError extends Error {
  */
 class Controller {
     private static instance: Controller;
-    private session: Session;
+    private _session: Session;
 
     constructor() {
         if (Controller.instance) {
@@ -39,6 +39,10 @@ class Controller {
         return 'Client Controller:: ';
     }
 
+    get session(): Session {
+        return this._session;
+    }
+
     startEdit(params: IEverySecondEditData): Promise<IScriptResultPayload> {
         if (!this.hasSession()) {
             throw new SessionNotExistsError(this);
@@ -49,10 +53,9 @@ class Controller {
 
     private init(): void {
         this.log('client controller is initing...');
-        this.session = new Session();
-        this.log(`do we have session ? ${this.hasSession()}`)
-
-        this.log('client controller has inited')
+        this._session = new Session();
+        this.log(`do we have session ? ${this.hasSession()}`);
+        this.log('client controller has inited');
     }
 
     /**
