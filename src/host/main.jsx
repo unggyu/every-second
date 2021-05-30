@@ -39,6 +39,19 @@ $._ES_ = {
 
 		return stringify(payload);
 	},
+	getProjectItems: function() {
+		var payload = {};
+
+		try {
+			app.enableQE();
+			payload.result = app.project.rootItem.children;
+			payload.status = SUCCESS;
+		} catch (err) {
+			payload.status = FAILURE;
+		}
+
+		return stringify(payload);
+	},
 	startEdit: function(paramStr) {
 		var payload = {};
 
