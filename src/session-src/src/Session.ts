@@ -7,15 +7,15 @@ class ScriptPrefixes {
 }
 
 class ESScripts {
-    static TEST_HOST: string = `${ScriptPrefixes.ES}test_host`;
-    static TEST_HOST_WITH_ARGS: string = `${ScriptPrefixes.ES}test_host_with_args`;
-    static START_EDIT: string = `${ScriptPrefixes.ES}start_edit`;
+    static TEST_HOST: string = `${ScriptPrefixes.ES}testHost`;
+    static TEST_HOST_WITH_PARAMS: string = `${ScriptPrefixes.ES}testHostWithParams`;
+    static START_EDIT: string = `${ScriptPrefixes.ES}startEdit`;
 }
 
-export class ESScriptError extends Error {
+class ESScriptError extends Error {
     private script: string;
     private innerError: string | object | undefined;
-    constructor(script: string, message?: string, innerError?: string | object) {
+    constructor(script: string, innerError?: string | object, message?: string) {
         super(message ?? 'Every second script error.');
         this.name = 'ESScriptError';
         this.script = script;
@@ -26,40 +26,40 @@ export class ESScriptError extends Error {
     }
 }
 
-export interface IScriptParameter {
+interface IScriptParameter {
 
 }
 
-export interface IEverySecondScriptParameter extends IScriptParameter {
+interface IEverySecondScriptParameter extends IScriptParameter {
 
 }
 
-export interface ITestHostWithArgsParameter extends IEverySecondScriptParameter {
+interface ITestHostWithParamsParameter extends IEverySecondScriptParameter {
     name: string;
 }
 
-export interface IStartEditParameter extends IEverySecondScriptParameter {
+interface IStartEditParameter extends IEverySecondScriptParameter {
     interval: number;
     clipsToMultipy: number;
     toEndOfTheVideo: boolean;
 }
 
-export interface IScriptResult {
+interface IScriptResult {
     data: string | object | undefined;
 }
 
-export interface IScriptResultPayload<TResult extends IScriptResult = IScriptResult> {
+interface IScriptResultPayload<TResult extends IScriptResult = IScriptResult> {
     name: string | undefined;
     status: string;
     result: TResult | undefined;
     error: string | object | undefined;
 }
 
-export interface IEverySecondScriptResult extends IScriptResult {
+interface IEverySecondScriptResult extends IScriptResult {
 
 }
 
-export interface ITestHostWithArgsResult extends IEverySecondScriptResult {
+interface ITestHostWithArgsResult extends IEverySecondScriptResult {
     parameters: string;
 }
 
@@ -68,11 +68,10 @@ export interface ITestHostWithArgsResult extends IEverySecondScriptResult {
  * well as the host
  *
  */
-export default class Session {
+class Session {
     private static instance: Session;
     private scriptLoader: ScriptLoader;
     private managers: DataManagers;
-    private name: string;
 
     constructor() {
         if (Session.instance) {
@@ -81,10 +80,13 @@ export default class Session {
 
         this.init();
         Session.instance = this;
-        this.name = 'Session:: ';
     }
 
-    init(): void {
+    get name(): string {
+        return 'Session:: ';
+    }
+
+    async init(): Promise<void> {
         // init before everything so I can intercept console.log
         this.log('session is initing...');
         this.managers = new DataManagers();
@@ -92,39 +94,51 @@ export default class Session {
         this.scriptLoader = new ScriptLoader();
         // load jsx file dynamically
         this.log('loading the main jsx file');
-        this.scriptLoader.loadJSX('main.jsx');
-
+        await this.scriptLoader.loadJSX('main.jsx');
 
         // some test
-        this.test();
-
+        await this.test();
         this.log('session is inited');
     }
 
-    test(): Promise<IScriptResultPayload | undefined> {
-        return this.evalScript(ESScripts.TEST_HOST);
+    async test(): Promise<void> {
+        try {
+            const result = await this.evalScript(ESScripts.TEST_HOST);
+            console.log(result);
+        } catch (err) {
+            console.error(err);
+            console.log(JSON.stringify(err, null, 2));
+        }
     }
 
-    testWithArgs(): Promise<IScriptResultPayload<ITestHostWithArgsResult> | undefined> {
-        const args: ITestHostWithArgsParameter = {
+    async testWithParams(): Promise<void> {
+        const args: ITestHostWithParamsParameter = {
             name: 'tomer'
         };
 
-        return this.evalScript<ITestHostWithArgsParameter, ITestHostWithArgsResult>(ESScripts.TEST_HOST_WITH_ARGS, args);
+        try {
+            const result = this.evalScript<ITestHostWithParamsParameter, ITestHostWithArgsResult>(ESScripts.TEST_HOST_WITH_PARAMS, args);
+            console.log(result);
+        } catch (err) {
+            console.error(err);
+            console.log(JSON.stringify(err, null, 2));
+        }
     }
 
-    startEdit(params: IStartEditParameter): Promise<IScriptResultPayload | undefined> {
+    startEdit(params: IStartEditParameter): Promise<IScriptResultPayload> {
         return this.evalScript(ESScripts.START_EDIT, params);
     }
 
-    private async evalScript<TParameter extends IScriptParameter | string | undefined = IScriptParameter, TResult extends IScriptResult = IScriptResult>(functionName: string, params?: TParameter): Promise<IScriptResultPayload<TResult> | undefined> {
+    private async evalScript<TParameter extends IScriptParameter | string | undefined = IScriptParameter, TResult extends IScriptResult = IScriptResult>(functionName: string, params?: TParameter): Promise<IScriptResultPayload<TResult>> {
         try {
             const result = await this.scriptLoader.evalScript(functionName, params);
             return JSON.parse(result) as IScriptResultPayload<TResult>;
         } catch (err) {
-            if (err === 'string') {
+            if (typeof err === 'string') {
                 const errObj = JSON.parse(err) as IScriptResultPayload;
-                throw new ESScriptError(functionName, undefined, errObj.error);
+                throw new ESScriptError(functionName, errObj.error);
+            } else {
+                throw new ESScriptError(functionName, err);
             }
         }
     }
@@ -137,4 +151,16 @@ export default class Session {
     private log(val: string): void {
         console.log(`${this.name} ${val}`)
     }
+}
+
+export default Session;
+export {
+    ESScriptError,
+    IScriptParameter,
+    ITestHostWithParamsParameter,
+    IStartEditParameter,
+    IScriptResult,
+    IScriptResultPayload,
+    IEverySecondScriptResult,
+    ITestHostWithArgsResult
 }

@@ -6,9 +6,9 @@ declare global {
     }
 }
 
-export type EverySecondEditData = IStartEditParameter;
+interface IEverySecondEditData extends IStartEditParameter {}
 
-export class SessionNotExistsError extends Error {
+class SessionNotExistsError extends Error {
     public controller: Controller;
     constructor(controller: Controller, message?: string) {
         super(message ?? 'Session not exists.');
@@ -22,10 +22,9 @@ export class SessionNotExistsError extends Error {
  * well as the host
  *
  */
-export default class Controller {
+class Controller {
     private static instance: Controller;
     private session: Session;
-    private name: string;
 
     constructor() {
         if (Controller.instance) {
@@ -34,18 +33,13 @@ export default class Controller {
 
         this.init();
         Controller.instance = this;
-        this.name = 'Client Controller:: ';
     }
 
-    init(): void {
-        this.log('client controller is initing...');
-        this.session = new Session();
-        this.log(`do we have session ? ${this.hasSession()}`)
-
-        this.log('client controller has inited')
+    get name(): string {
+        return 'Client Controller:: ';
     }
 
-    startEdit(params: EverySecondEditData): Promise<IScriptResultPayload | undefined> {
+    startEdit(params: IEverySecondEditData): Promise<IScriptResultPayload> {
         if (!this.hasSession()) {
             throw new SessionNotExistsError(this);
         }
@@ -53,12 +47,20 @@ export default class Controller {
         return this.session.startEdit(params);
     }
 
+    private init(): void {
+        this.log('client controller is initing...');
+        this.session = new Session();
+        this.log(`do we have session ? ${this.hasSession()}`)
+
+        this.log('client controller has inited')
+    }
+
     /**
      * do we have access to session services ?
      *
      * @return {boolean} true/false
      */
-    hasSession(): boolean {
+    private hasSession(): boolean {
         return window.session !== undefined;
     }
 
@@ -67,7 +69,13 @@ export default class Controller {
      *
      * @param  {string} val what to log
      */
-    log(val: string): void {
+    private log(val: string): void {
         console.log(`${this.name} ${val}`);
     }
+}
+
+export default Controller;
+export {
+    IEverySecondEditData,
+    SessionNotExistsError
 }

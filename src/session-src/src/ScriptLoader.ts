@@ -21,7 +21,7 @@ declare global {
 /**
  * load jsx scripts dynamically
  */
-export default class ScriptLoader {
+class ScriptLoader {
     private static instance: ScriptLoader;
     private name: string;
     private csInterface: CSInterface;
@@ -33,6 +33,7 @@ export default class ScriptLoader {
 
         this.name = 'ScriptLoader:: ';
         this.csInterface = new CSInterface();
+
         ScriptLoader.instance = this;
     }
 
@@ -43,12 +44,16 @@ export default class ScriptLoader {
      * @param fileName the file name
      * @return description
      */
-    public loadJSX(fileName: string): void {
+    public async loadJSX(fileName: string): Promise<string> {
         var extensionRoot = path.join(this.csInterface.getSystemPath(SystemPath.EXTENSION), 'host');
-
-        this.evalScript('$._ext.evalFile', path.join(extensionRoot, fileName))
-            .then(res => console.log(JSON.parse(res as string)))
-            .catch(err => console.log(JSON.parse(err)));
+        try {
+            const result = await this.evalScript('$._ext.evalFile', path.join(extensionRoot, fileName));
+            console.log(JSON.parse(result));
+            return result;
+        } catch (err) {
+            console.log(JSON.parse(err));
+            throw err;
+        }
     }
 
     public evalScript(functionName: string, params?: string | object): Promise<string> {
@@ -57,13 +62,11 @@ export default class ScriptLoader {
         this.log('evalString: ' + evalString);
 
         return new Promise((resolve, reject) => {
-            this.csInterface.evalScript(evalString, res => {
+            this.csInterface.evalScript(evalString, (res) => {
                 res = decodeURIComponent(res);
                 if (res.toLowerCase().indexOf('error') === -1) {
-                    this.log('success eval');
                     resolve(res);
                 } else {
-                    this.log('err eval');
                     reject(res);
                 }
             });
@@ -89,3 +92,5 @@ export default class ScriptLoader {
         console.log(`${this.name} ${val}`);
     }
 }
+
+export default ScriptLoader;

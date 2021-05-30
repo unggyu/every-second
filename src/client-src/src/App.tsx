@@ -16,7 +16,7 @@ import {
     withStyles,
     createMuiTheme
 } from '@material-ui/core/styles/index';
-import Controller, { EverySecondEditData } from './Controller';
+import Controller, { IEverySecondEditData } from './Controller';
 
 let theme: Theme = createMuiTheme({
     palette: {
@@ -43,25 +43,26 @@ let styles = ((theme: Theme) => createStyles({
     },
     flexContainer: {
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        padding: '10px'
     }
 }));
 
-interface AppProps extends WithStyles<typeof styles> {
+interface IAppProps extends WithStyles<typeof styles> {
     controller: Controller;
 }
 
-type AppState = EverySecondEditData;
+interface IAppState extends IEverySecondEditData {}
 
 /**
  * main app component
  *
  */
-class App extends Component<AppProps, AppState> {
+class App extends Component<IAppProps, IAppState> {
     private controller: Controller;
-    private classes: AppProps['classes'];
+    private classes: IAppProps['classes'];
 
-    constructor(props: AppProps) {
+    constructor(props: IAppProps) {
         super(props);
 
         this.state = {
@@ -78,34 +79,34 @@ class App extends Component<AppProps, AppState> {
         this.handleToEndOfTheVideoChange = this.handleToEndOfTheVideoChange.bind(this);
     }
 
-    removeNotNumbers(str: string): string {
+    private removeNotNumbers(str: string): string {
         return str.replace(/[^0-9]/g, '');
     }
 
-    onClickEditStartBtn = async (): Promise<void> => {
+    private onClickEditStartBtn = async (): Promise<void> => {
         try {
             const result = await this.controller.startEdit(this.state);
             console.log(result);
         } catch (err) {
-            console.log(err);
+            console.error(err);
         }
     }
 
-    handleIntervalChange(e: ChangeEvent<HTMLInputElement>) {
+    private handleIntervalChange(e: ChangeEvent<HTMLInputElement>) {
         const onlyNums = this.removeNotNumbers(e.target.value);
         this.setState({
             interval: +onlyNums
         });
     }
 
-    handleClipsToMultipyChange(e: ChangeEvent<HTMLInputElement>) {
+    private handleClipsToMultipyChange(e: ChangeEvent<HTMLInputElement>) {
         const onlyNums = this.removeNotNumbers(e.target.value);
         this.setState({
             clipsToMultipy: +onlyNums
         });
     }
 
-    handleToEndOfTheVideoChange(e: ChangeEvent<HTMLInputElement>) {
+    private handleToEndOfTheVideoChange(e: ChangeEvent<HTMLInputElement>) {
         this.setState({
             toEndOfTheVideo: e.target.checked
         });
@@ -145,3 +146,7 @@ class App extends Component<AppProps, AppState> {
 }
 
 export default withStyles(styles)(App);
+export {
+    IAppProps,
+    IAppState
+}

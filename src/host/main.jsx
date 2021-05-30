@@ -1,36 +1,49 @@
+var SUCCESS = 'success';
+var FAILURE = 'failure';
+
+function parse(json) {
+	return JSON.parse(decoideURIComponent(json));
+}
+
+function stringify(obj) {
+	return encodeURIComponent(JSON.stringify(obj));
+}
+
 $._ES_ = {
-	test_host: function() {
+	testHost: function() {
 		var payload = {};
 
 		try {
-			payload.status = 'success';
-			payload.result.data = 'test_host result';
+			payload.result = {};
+			payload.result.data = 'testHost result';
+			payload.status = SUCCESS;
 		} catch (err) {
-			payload.status = 'failure';
+			payload.status = FAILURE;
 			payload.error = err;
 		}
 
-		return encodeURIComponent(JSON.stringify(payload));
+		return stringify(payload);
 	},
-	test_host_with_args: function(paramsStr) {
+	testHostWithParams: function(paramStr) {
 		var payload = {};
 		
 		try {
-			payload.status = 'success';
-			payload.result.parameters = decodeURIComponent(paramsStr);
+			payload.reuslt = {};
+			payload.result.parameters = decodeURIComponent(paramStr);
 			payload.result.data = 'hola from extendscript ' + JSON.parse(payload.result.parameters).name;
+			payload.status = SUCCESS;
 		} catch (err) {
-			payload.status = 'failure';
+			payload.status = FAILURE;
 			payload.error = err;
 		}
 
-		return encodeURIComponent(JSON.stringify(payload));
+		return stringify(payload);
 	},
-	start_edit: function(paramsStr) {
+	startEdit: function(paramStr) {
 		var payload = {};
 
 		try {
-			var parsedParams = JSON.parse(decodeURIComponent(paramsStr));
+			var parsedParams = parse(paramStr);
 
 			app.enableQE();
 
@@ -55,12 +68,12 @@ $._ES_ = {
 				}
 			}
 
-			payload.status = 'success';
+			payload.status = SUCCESS;
 		} catch (err) {
-			payload.status = 'failure';
+			payload.status = FAILURE;
 			payload.error = err;
 		}
 
-		return encodeURIComponent(JSON.stringify(payload));
+		return stringify(payload);
 	}
 }
