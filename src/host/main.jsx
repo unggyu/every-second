@@ -23,7 +23,7 @@ $._ES_ = {
 
 		return stringify(payload);
 	},
-	testHostWithParams: function(paramStr) {
+	testHostWithParam: function(paramStr) {
 		var payload = {};
 		
 		try {

@@ -63,8 +63,8 @@ class ScriptLoader {
     }
 
     public evalFunction(functionName: string, params?: string | object): Promise<string> {
-        const script = this.makeEvalString(functionName, params);
-        this.log('script: ' + this.makeEvalString(functionName, params, false));
+        const script = this.makeEvalFunctionScript(functionName, params);
+        this.log('script: ' + this.makeEvalFunctionScript(functionName, params, false));
 
         return this.evalScript(script);
     }
@@ -82,7 +82,12 @@ class ScriptLoader {
         });
     }
 
-    private evalFunctionParamsToString(params: undefined | string | object, encode: boolean = true): string {
+    private makeEvalFunctionScript(functionName: string, params?: string | object, encode: boolean = true) {
+        const paramString = this.evalFunctionParamToString(params, encode);
+        return `${functionName}(${paramString})`;
+    }
+
+    private evalFunctionParamToString(params: string | object | undefined, encode: boolean = true): string {
         if (typeof params === 'object') {
             if (encode) {
                 return `"${encodeURIComponent(JSON.stringify(params))}"`;
@@ -98,11 +103,6 @@ class ScriptLoader {
         } else {
             return '';
         }
-    }
-
-    private makeEvalString(functionName: string, params?: string | object, encode: boolean = true) {
-        const paramsString = this.evalFunctionParamsToString(params, encode);
-        return `${functionName}(${paramsString})`;
     }
 
     /**

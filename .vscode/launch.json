@@ -5,11 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Attach to Chrome",
             "type": "chrome",
             "request": "attach",
-            "name": "Attach to Chrome",
+            "trace": true,
+            "address": "127.0.0.1",
             "port": 3006,
-            "webRoot": "${workspaceRoot}"
+            "disableNetworkCache": true,
+            "webRoot": "${workspaceRoot}",
+            "sourceMaps": true
         }
     ]
 }

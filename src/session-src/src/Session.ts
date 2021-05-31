@@ -8,7 +8,7 @@ class ScriptPrefixes {
 
 class ESScripts {
     static TEST_HOST: string = `${ScriptPrefixes.ES}testHost`;
-    static TEST_HOST_WITH_PARAMS: string = `${ScriptPrefixes.ES}testHostWithParams`;
+    static TEST_HOST_WITH_PARAMS: string = `${ScriptPrefixes.ES}testHostWithParam`;
     static GET_PROJECT_ITEMS: string = `${ScriptPrefixes.ES}getProjectItems`;
     static START_EDIT: string = `${ScriptPrefixes.ES}startEdit`;
 }
@@ -27,13 +27,11 @@ class ESScriptError extends Error {
     }
 }
 
-interface IScriptParameter {}
-
-interface ITestHostWithParamsParameter extends IScriptParameter {
+interface ITestHostWithParamsParameter {
     name: string;
 }
 
-interface IStartEditParameter extends IScriptParameter {
+interface IStartEditParameter {
     interval: number;
     clipsToMultipy: number;
     toEndOfTheVideo: boolean;
@@ -107,13 +105,13 @@ class Session {
         }
     }
 
-    async testWithParams(): Promise<void> {
-        const args: ITestHostWithParamsParameter = {
+    async testWithParam(): Promise<void> {
+        const param: ITestHostWithParamsParameter = {
             name: 'tomer'
         };
 
         try {
-            const result = this.evalFunction<ITestHostWithParamsParameter, ITestHostWithArgsResult>(ESScripts.TEST_HOST_WITH_PARAMS, args);
+            const result = this.evalFunction<ITestHostWithParamsParameter, ITestHostWithArgsResult>(ESScripts.TEST_HOST_WITH_PARAMS, param);
             console.log(result);
         } catch (err) {
             console.error(err);
@@ -122,21 +120,26 @@ class Session {
     }
 
     getProjectItems(): Promise<IScriptResultPayload<ProjectItemCollection>> {
-        return this.evalFunction<IScriptParameter, ProjectItemCollection>(ESScripts.GET_PROJECT_ITEMS);
+        return this.evalFunction<undefined, ProjectItemCollection>(ESScripts.GET_PROJECT_ITEMS);
     }
 
     startEdit(params: IStartEditParameter): Promise<IScriptResultPayload> {
         return this.evalFunction(ESScripts.START_EDIT, params);
     }
 
-    private async evalFunction<TParameter extends IScriptParameter | string | undefined = IScriptParameter, TResult = undefined>(functionName: string, params?: TParameter): Promise<IScriptResultPayload<TResult>> {
+    private async evalFunction<TParameter extends string | object | undefined = undefined, TResult = undefined>(functionName: string, params?: TParameter): Promise<IScriptResultPayload<TResult>> {
         try {
             const result = await this.scriptLoader.evalFunction(functionName, params);
             return JSON.parse(result) as IScriptResultPayload<TResult>;
         } catch (err) {
             if (typeof err === 'string') {
-                const errObj = JSON.parse(err) as IScriptResultPayload<TResult>;
-                throw new ESScriptError(functionName, errObj.error);
+                var errObj: IScriptResultPayload<TResult>;
+                try {
+                    errObj = JSON.parse(err);
+                    throw new ESScriptError(functionName, errObj);
+                } catch (err2) {
+                    throw new ESScriptError(functionName, err);
+                }
             } else {
                 throw new ESScriptError(functionName, err);
             }
@@ -156,7 +159,6 @@ class Session {
 export default Session;
 export {
     ESScriptError,
-    IScriptParameter,
     ITestHostWithParamsParameter,
     IStartEditParameter,
     IScriptResultPayload,
