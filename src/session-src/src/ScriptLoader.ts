@@ -72,7 +72,7 @@ class ScriptLoader {
         return new Promise<string>((resolve, reject) => {
             this.csInterface.evalScript(script, (res) => {
                 res = decodeURIComponent(res);
-                if (res.toLowerCase().indexOf('error') === -1) {
+                if (!res.toLowerCase().includes('error')) {
                     resolve(res);
                 } else {
                     reject(res);

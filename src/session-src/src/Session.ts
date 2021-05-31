@@ -4,10 +4,10 @@ import DataManagers from './managers/DataManagers';
 
 let SCRIPT_PREFIX_ES = '$._ES_.';
 
-class ESScriptError extends Error {
+class ESScriptError<TInnerError = undefined> extends Error {
     private script: string;
-    private innerError: string | object | undefined;
-    constructor(script: string, innerError?: string | object, message?: string) {
+    private innerError: TInnerError | undefined;
+    constructor(script: string, innerError?: TInnerError, message?: string) {
         super(message ?? 'Every second script error.');
         this.name = 'ESScriptError';
         this.script = script;
@@ -120,6 +120,11 @@ class Session {
         return this.evalFunction(functionName, index);
     }
 
+    public addTrack(): Promise<IScriptResultPayload> {
+        const functionName = this.attachPrefix('addTrack');
+        return this.evalFunction(functionName);
+    }
+
     public startEdit(params: IStartEditParameter): Promise<IScriptResultPayload> {
         const functionName = this.attachPrefix('startEdit');
         return this.evalFunction(functionName, params);
@@ -134,13 +139,16 @@ class Session {
             return result;
         } catch (err) {
             if (typeof err === 'string') {
+                var errPayload: IScriptResultPayload;
+
                 try {
-                    const errPayload: IScriptResultPayload = JSON.parse(err);
+                    errPayload = JSON.parse(err);
                     errPayload.script = script;
-                    throw new ESScriptError(script, errPayload);
                 } catch (err2) {
                     throw new ESScriptError(script, err);
                 }
+
+                throw new ESScriptError(script, errPayload.error);
             } else {
                 throw new ESScriptError(script, err);
             }
