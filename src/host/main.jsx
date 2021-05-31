@@ -14,8 +14,7 @@ $._ES_ = {
 		var payload = {};
 
 		try {
-			payload.result = {};
-			payload.result.data = 'testHost result';
+			payload.result = 'testHost result';
 			payload.status = SUCCESS;
 		} catch (err) {
 			payload.status = FAILURE;

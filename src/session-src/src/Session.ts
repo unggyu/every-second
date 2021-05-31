@@ -9,6 +9,7 @@ class ScriptPrefixes {
 class ESScripts {
     static TEST_HOST: string = `${ScriptPrefixes.ES}testHost`;
     static TEST_HOST_WITH_PARAMS: string = `${ScriptPrefixes.ES}testHostWithParams`;
+    static GET_PROJECT_ITEMS: string = `${ScriptPrefixes.ES}getProjectItems`;
     static START_EDIT: string = `${ScriptPrefixes.ES}startEdit`;
 }
 
@@ -26,41 +27,28 @@ class ESScriptError extends Error {
     }
 }
 
-interface IScriptParameter {
+interface IScriptParameter {}
 
-}
-
-interface IEverySecondScriptParameter extends IScriptParameter {
-
-}
-
-interface ITestHostWithParamsParameter extends IEverySecondScriptParameter {
+interface ITestHostWithParamsParameter extends IScriptParameter {
     name: string;
 }
 
-interface IStartEditParameter extends IEverySecondScriptParameter {
+interface IStartEditParameter extends IScriptParameter {
     interval: number;
     clipsToMultipy: number;
     toEndOfTheVideo: boolean;
 }
 
-interface IScriptResult {
-    data: string | object | undefined;
-}
-
-interface IScriptResultPayload<TResult extends IScriptResult = IScriptResult> {
+interface IScriptResultPayload<TResult = undefined> {
     name: string | undefined;
     status: string;
     result: TResult | undefined;
     error: string | object | undefined;
 }
 
-interface IEverySecondScriptResult extends IScriptResult {
-
-}
-
-interface ITestHostWithArgsResult extends IEverySecondScriptResult {
+interface ITestHostWithArgsResult {
     parameters: string;
+    data: string;
 }
 
 /**
@@ -111,7 +99,7 @@ class Session {
 
     async test(): Promise<void> {
         try {
-            const result = await this.evalScript(ESScripts.TEST_HOST);
+            const result = await this.evalFunction(ESScripts.TEST_HOST);
             console.log(result);
         } catch (err) {
             console.error(err);
@@ -125,7 +113,7 @@ class Session {
         };
 
         try {
-            const result = this.evalScript<ITestHostWithParamsParameter, ITestHostWithArgsResult>(ESScripts.TEST_HOST_WITH_PARAMS, args);
+            const result = this.evalFunction<ITestHostWithParamsParameter, ITestHostWithArgsResult>(ESScripts.TEST_HOST_WITH_PARAMS, args);
             console.log(result);
         } catch (err) {
             console.error(err);
@@ -133,17 +121,21 @@ class Session {
         }
     }
 
-    startEdit(params: IStartEditParameter): Promise<IScriptResultPayload> {
-        return this.evalScript(ESScripts.START_EDIT, params);
+    getProjectItems(): Promise<IScriptResultPayload<ProjectItemCollection>> {
+        return this.evalFunction<IScriptParameter, ProjectItemCollection>(ESScripts.GET_PROJECT_ITEMS);
     }
 
-    private async evalScript<TParameter extends IScriptParameter | string | undefined = IScriptParameter, TResult extends IScriptResult = IScriptResult>(functionName: string, params?: TParameter): Promise<IScriptResultPayload<TResult>> {
+    startEdit(params: IStartEditParameter): Promise<IScriptResultPayload> {
+        return this.evalFunction(ESScripts.START_EDIT, params);
+    }
+
+    private async evalFunction<TParameter extends IScriptParameter | string | undefined = IScriptParameter, TResult = undefined>(functionName: string, params?: TParameter): Promise<IScriptResultPayload<TResult>> {
         try {
-            const result = await this.scriptLoader.evalScript(functionName, params);
+            const result = await this.scriptLoader.evalFunction(functionName, params);
             return JSON.parse(result) as IScriptResultPayload<TResult>;
         } catch (err) {
             if (typeof err === 'string') {
-                const errObj = JSON.parse(err) as IScriptResultPayload;
+                const errObj = JSON.parse(err) as IScriptResultPayload<TResult>;
                 throw new ESScriptError(functionName, errObj.error);
             } else {
                 throw new ESScriptError(functionName, err);
@@ -167,8 +159,6 @@ export {
     IScriptParameter,
     ITestHostWithParamsParameter,
     IStartEditParameter,
-    IScriptResult,
     IScriptResultPayload,
-    IEverySecondScriptResult,
     ITestHostWithArgsResult
 }

@@ -2,14 +2,13 @@
     "compilerOptions": {
         "target": "es2018",
         "module": "commonJs",
-        //"noLib": true,
         "strict": true,
         "strictPropertyInitialization": false,
         "noImplicitAny": true,
         "noImplicitThis": true,
         "strictNullChecks": true,
         "esModuleInterop": true,
-        "types": ["type-for-adobe/Premiere/2018"]
+        "types": ["node", "types-for-adobe/Premiere/2018"]
     },
     "include": ["./src/**/*"]
 }

@@ -23,7 +23,6 @@ declare global {
  */
 class ScriptLoader {
     private static instance: ScriptLoader;
-    private name: string;
     private _csInterface: CSInterface;
 
     constructor() {
@@ -31,10 +30,13 @@ class ScriptLoader {
             return ScriptLoader.instance;
         }
 
-        this.name = 'ScriptLoader:: ';
         this._csInterface = new CSInterface();
 
         ScriptLoader.instance = this;
+    }
+
+    get name(): string {
+        return 'ScriptLoader:: ';
     }
 
     get csInterface(): CSInterface {
@@ -51,21 +53,25 @@ class ScriptLoader {
     public async loadJSX(fileName: string): Promise<string> {
         const extensionRoot = path.join(this.csInterface.getSystemPath(SystemPath.EXTENSION), 'host');
         try {
-            const result = await this.evalScript('$._ext.evalFile', path.join(extensionRoot, fileName));
+            const result = await this.evalFunction('$._ext.evalFile', path.join(extensionRoot, fileName));
             console.log(JSON.parse(result));
             return result;
         } catch (err) {
-            console.log(JSON.parse(err));
+            console.log(err);
             throw err;
         }
     }
 
-    public evalScript(functionName: string, params?: string | object): Promise<string> {
-        const evalString = this.makeEvalString(functionName, params);
-        this.log('eval: ' + this.makeEvalString(functionName, params, false));
+    public evalFunction(functionName: string, params?: string | object): Promise<string> {
+        const script = this.makeEvalString(functionName, params);
+        this.log('script: ' + this.makeEvalString(functionName, params, false));
 
-        return new Promise((resolve, reject) => {
-            this.csInterface.evalScript(evalString, (res) => {
+        return this.evalScript(script);
+    }
+
+    public evalScript(script: string): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            this.csInterface.evalScript(script, (res) => {
                 res = decodeURIComponent(res);
                 if (res.toLowerCase().indexOf('error') === -1) {
                     resolve(res);
@@ -76,7 +82,7 @@ class ScriptLoader {
         });
     }
 
-    private evalScriptParamsToString(params: undefined | string | object, encode: boolean = true): string {
+    private evalFunctionParamsToString(params: undefined | string | object, encode: boolean = true): string {
         if (typeof params === 'object') {
             if (encode) {
                 return `"${encodeURIComponent(JSON.stringify(params))}"`;
@@ -95,7 +101,7 @@ class ScriptLoader {
     }
 
     private makeEvalString(functionName: string, params?: string | object, encode: boolean = true) {
-        const paramsString = this.evalScriptParamsToString(params, encode);
+        const paramsString = this.evalFunctionParamsToString(params, encode);
         return `${functionName}(${paramsString})`;
     }
 
