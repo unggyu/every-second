@@ -35,11 +35,11 @@ class ScriptLoader {
         ScriptLoader.instance = this;
     }
 
-    get name(): string {
+    public get name(): string {
         return 'ScriptLoader:: ';
     }
 
-    get csInterface(): CSInterface {
+    public get csInterface(): CSInterface {
         return this._csInterface;
     }
 
@@ -62,10 +62,9 @@ class ScriptLoader {
         }
     }
 
-    public evalFunction(functionName: string, params?: string | object): Promise<string> {
-        const script = this.makeEvalFunctionScript(functionName, params);
-        this.log('script: ' + this.makeEvalFunctionScript(functionName, params, false));
-
+    public evalFunction(functionName: string, param?: number | string | object): Promise<string> {
+        this.log('functionScript: ' + this.makeEvalFunctionScript(functionName, param, false));
+        const script = this.makeEvalFunctionScript(functionName, param);
         return this.evalScript(script);
     }
 
@@ -82,24 +81,26 @@ class ScriptLoader {
         });
     }
 
-    private makeEvalFunctionScript(functionName: string, params?: string | object, encode: boolean = true) {
-        const paramString = this.evalFunctionParamToString(params, encode);
-        return `${functionName}(${paramString})`;
+    public makeEvalFunctionScript(functionName: string, param?: number | string | object, encode: boolean = true) {
+        const paramtring = this.evalFunctionParamToString(param, encode);
+        return `${functionName}(${paramtring})`;
     }
 
-    private evalFunctionParamToString(params: string | object | undefined, encode: boolean = true): string {
-        if (typeof params === 'object') {
+    private evalFunctionParamToString(param: number | string | object | undefined, encode: boolean = true): string {
+        if (typeof param === 'object') {
             if (encode) {
-                return `"${encodeURIComponent(JSON.stringify(params))}"`;
+                return `"${encodeURIComponent(JSON.stringify(param))}"`;
             } else {
-                return `"${JSON.stringify(params)}"`;
+                return `"${JSON.stringify(param)}"`;
             }
-        } else if (typeof params === 'string') {
+        } else if (typeof param === 'string') {
             if (encode) {
-                return `"${encodeURIComponent(params)}"`;
+                return `"${encodeURIComponent(param)}"`;
             } else {
-                return `"${params}"`;
+                return `"${param}"`;
             }
+        } else if (typeof param === 'number') {
+            return param + '';
         } else {
             return '';
         }

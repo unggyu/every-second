@@ -27,9 +27,11 @@ $._ES_ = {
 		var payload = {};
 		
 		try {
-			payload.reuslt = {};
-			payload.result.parameters = decodeURIComponent(paramStr);
-			payload.result.data = 'hola from extendscript ' + JSON.parse(payload.result.parameters).name;
+			var parameter = decodeURIComponent(paramStr);
+			var parameterObj = JSON.parse(parameter);
+			payload.result = {};
+			payload.result.parameter = parameter;
+			payload.result.data = 'hola from extendscript ' + parameterObj.name;
 			payload.status = SUCCESS;
 		} catch (err) {
 			payload.status = FAILURE;
@@ -38,15 +40,30 @@ $._ES_ = {
 
 		return stringify(payload);
 	},
-	getProjectItems: function() {
+	getProjectItemsLength: function() {
 		var payload = {};
 
 		try {
 			app.enableQE();
-			payload.result = app.project.rootItem.children;
+			payload.result = app.project.rootItem.children.length;
 			payload.status = SUCCESS;
 		} catch (err) {
 			payload.status = FAILURE;
+			payload.error = err;
+		}
+
+		return stringify(payload);
+	},
+	getProjectItem: function(index) {
+		var payload = {};
+
+		try {
+			app.enableQE();
+			payload.result = app.project.rootItem.children[index];
+			payload.status = SUCCESS;
+		} catch (err) {
+			payload.status = FAILURE;
+			payload.error = err;
 		}
 
 		return stringify(payload);

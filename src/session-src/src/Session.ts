@@ -2,16 +2,7 @@
 import ScriptLoader from './ScriptLoader';
 import DataManagers from './managers/DataManagers';
 
-class ScriptPrefixes {
-    static ES: string = '$._ES_.';
-}
-
-class ESScripts {
-    static TEST_HOST: string = `${ScriptPrefixes.ES}testHost`;
-    static TEST_HOST_WITH_PARAMS: string = `${ScriptPrefixes.ES}testHostWithParam`;
-    static GET_PROJECT_ITEMS: string = `${ScriptPrefixes.ES}getProjectItems`;
-    static START_EDIT: string = `${ScriptPrefixes.ES}startEdit`;
-}
+let SCRIPT_PREFIX_ES = '$._ES_.';
 
 class ESScriptError extends Error {
     private script: string;
@@ -38,14 +29,14 @@ interface IStartEditParameter {
 }
 
 interface IScriptResultPayload<TResult = undefined> {
-    name: string | undefined;
     status: string;
-    result: TResult | undefined;
-    error: string | object | undefined;
+    script?: string;
+    result?: TResult;
+    error?: object;
 }
 
-interface ITestHostWithArgsResult {
-    parameters: string;
+interface ITestHostWithParamResult {
+    parameter: string;
     data: string;
 }
 
@@ -68,19 +59,19 @@ class Session {
         Session.instance = this;
     }
 
-    get name(): string {
+    public get name(): string {
         return 'Session:: ';
     }
 
-    get scriptLoader(): ScriptLoader {
+    public get scriptLoader(): ScriptLoader {
         return this._scriptLoader;
     }
 
-    get managers(): DataManagers {
+    public get managers(): DataManagers {
         return this._managers;
     }
 
-    async init(): Promise<void> {
+    public async init(): Promise<void> {
         // init before everything so I can intercept console.log
         this.log('session is initing...');
         this._managers = new DataManagers();
@@ -95,55 +86,69 @@ class Session {
         this.log('session is inited');
     }
 
-    async test(): Promise<void> {
+    public async test(): Promise<void> {
         try {
-            const result = await this.evalFunction(ESScripts.TEST_HOST);
+            const functionName = this.attachPrefix('testHost');
+            const result = await this.evalFunction(functionName);
             console.log(result);
         } catch (err) {
             console.error(err);
-            console.log(JSON.stringify(err, null, 2));
         }
     }
 
-    async testWithParam(): Promise<void> {
+    public async testWithParam(): Promise<void> {
         const param: ITestHostWithParamsParameter = {
             name: 'tomer'
         };
 
         try {
-            const result = this.evalFunction<ITestHostWithParamsParameter, ITestHostWithArgsResult>(ESScripts.TEST_HOST_WITH_PARAMS, param);
+            const functionName = this.attachPrefix('testHostWithParam');
+            const result = await this.evalFunction<ITestHostWithParamsParameter, ITestHostWithParamResult>(functionName, param);
             console.log(result);
         } catch (err) {
             console.error(err);
-            console.log(JSON.stringify(err, null, 2));
         }
     }
 
-    getProjectItems(): Promise<IScriptResultPayload<ProjectItemCollection>> {
-        return this.evalFunction<undefined, ProjectItemCollection>(ESScripts.GET_PROJECT_ITEMS);
+    public getProjectItemsLength(): Promise<IScriptResultPayload<number>> {
+        const functionName = this.attachPrefix('getProjectItemsLength');
+        return this.evalFunction(functionName);
     }
 
-    startEdit(params: IStartEditParameter): Promise<IScriptResultPayload> {
-        return this.evalFunction(ESScripts.START_EDIT, params);
+    public getProjectItem(index: number): Promise<IScriptResultPayload<ProjectItem>> {
+        const functionName = this.attachPrefix('getProjectItem');
+        return this.evalFunction(functionName, index);
     }
 
-    private async evalFunction<TParameter extends string | object | undefined = undefined, TResult = undefined>(functionName: string, params?: TParameter): Promise<IScriptResultPayload<TResult>> {
+    public startEdit(params: IStartEditParameter): Promise<IScriptResultPayload> {
+        const functionName = this.attachPrefix('startEdit');
+        return this.evalFunction(functionName, params);
+    }
+
+    private async evalFunction<TParameter extends number | string | object | undefined = undefined, TResult = undefined>(functionName: string, param?: TParameter): Promise<IScriptResultPayload<TResult>> {
+        const script = this.scriptLoader.makeEvalFunctionScript(functionName, param, false);
         try {
-            const result = await this.scriptLoader.evalFunction(functionName, params);
-            return JSON.parse(result) as IScriptResultPayload<TResult>;
+            const resultStr = await this.scriptLoader.evalFunction(functionName, param);
+            const result: IScriptResultPayload<TResult> = JSON.parse(resultStr);
+            result.script = script;
+            return result;
         } catch (err) {
             if (typeof err === 'string') {
-                var errObj: IScriptResultPayload<TResult>;
                 try {
-                    errObj = JSON.parse(err);
-                    throw new ESScriptError(functionName, errObj);
+                    const errPayload: IScriptResultPayload = JSON.parse(err);
+                    errPayload.script = script;
+                    throw new ESScriptError(script, errPayload);
                 } catch (err2) {
-                    throw new ESScriptError(functionName, err);
+                    throw new ESScriptError(script, err);
                 }
             } else {
-                throw new ESScriptError(functionName, err);
+                throw new ESScriptError(script, err);
             }
         }
+    }
+
+    private attachPrefix(functionName: string): string {
+        return SCRIPT_PREFIX_ES + functionName;
     }
 
     /**
@@ -162,5 +167,5 @@ export {
     ITestHostWithParamsParameter,
     IStartEditParameter,
     IScriptResultPayload,
-    ITestHostWithArgsResult
+    ITestHostWithParamResult
 }
