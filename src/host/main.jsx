@@ -10,6 +10,10 @@ function stringify(obj) {
 	return encodeURIComponent(JSON.stringify(obj));
 }
 
+if ($ === undefined) {
+	$ = {};
+}
+
 $._ES_ = {
 	testHost: function() {
 		var payload = {};
@@ -83,42 +87,66 @@ $._ES_ = {
 
 		return stringify(payload);
 	},
-	startEdit: function(paramStr) {
+	startEdit: function(param) {
 		var payload = {};
 
 		try {
-			var parsedParam = parse(paramStr);
+			if (typeof param === 'string') {	
+				param = parse(param);
+			}
+			// Enable qe to use the qe object
+			app.enableQE();
 			var activeSeq = app.project.activeSequence;
-			var clip = app.project.rootItem.children[0];
-			var currentTime = parsedParam.interval;
+			var videoTracks = activeSeq.videoTracks;
 			
-			var endTime;
+			// Finding the number of tracks needed to inject a clip
+			var endTime = 0;
 			var trackCountToAdd;
-			if (parsedParam.toEndOftheVideo) {
-				endTime = activeSeq.end / TIME_COEFFICIENT;
-				trackCountToAdd = parseInt(endTime / parsedParam.interval) - activeSeq.videoTracks.numTracks;
+			if (param.toEndOfTheVideo) {
+				var qeClip = qe.source.clip;
+				var frameRate = Math.round(qeClip.videoFrameRate);
+				var hmst = qeClip.duration.split(':');
+				endTime += hmst[0] * 60 * 60; // hour
+				endTime += hmst[1] * 60;	  // minute
+				endTime += hmst[2] * 1;		  // second
+				trackCountToAdd = parseInt(endTime / param.interval) - videoTracks.numTracks;
 			} else {
-				trackCountToAdd = parsedParam.clipsToMultipy - activeSeq.videoTracks.numTracks;
+				trackCountToAdd = param.clipsToMultipy - videoTracks.numTracks;
 			}
 
+			// Add a track using the qe object
+			var activeQeSeq = qe.project.getActiveSequence();
 			for (var i = 0; i < trackCountToAdd; i++) {
-				app.enableQE();
-				var activeQeSeq = qe.project.getActiveSequence();
 				// 1 audio track, 1 video track
 				activeQeSeq.addTracks(1);
 			}
 
-			if (parsedParam.toEndOfTheVideo) {
-				var currentTime = parsedParam.interval;
-				var videoTracks = activeSeq.videoTracks;
+			// Find and inject the same clip as qeclip
+			var clip;
+			var projectItemCollection = app.project.rootItem.children;
+			for (var i = 0; i < projectItemCollection.numItems; i++) {
+				if (projectItemCollection[i].name === qe.source.clip.name) {
+					clip = projectItemCollection[i];
+				}
+			}
+
+			if (clip === undefined) {
+				throw new Error('Clip not found');
+			}
+
+			var currentTime = param.interval;
+			if (param.toEndOfTheVideo) {
+				// injection till the end of the video
+				var currentTime = param.interval;
 				for (var i = 0; currentTime < endTime; i++) {
-					videoTracks[i + 1].insertClip(clip, currentTime);
-					currentTime += parsedParam.interval;
+					videoTracks[i].insertClip(clip, currentTime);
+					currentTime += param.interval;
 				}
 			} else {
-				for (var i = 0; i < parsedParam.numberOfClipsToMultiply; i++) {
-					videoTracks[i + 1].insertClip(clip, currentTime);
-					currentTime += parsedParam.interval;
+				// Inject as many as the number of injections entered as parameters
+				for (var i = 0; i < param.clipsToMultipy; i++) {
+					videoTracks[i].insertClip(clip, currentTime);
+					currentTime += param.interval;
 				}
 			}
 
@@ -131,3 +159,20 @@ $._ES_ = {
 		return stringify(payload);
 	}
 }
+
+$._EST_ = {
+	startEditTest: function() {
+		try {
+			var result = $._ES_.startEdit({
+				interval: 1,
+				clipsToMultipy: 0,
+				toEndOfTheVideo: true
+			});
+			alert(decodeURIComponent(result));
+		} catch (err) {
+			alert(JSON.stringify(err));
+		}
+	}
+}
+
+// $._EST_.startEditTest();
