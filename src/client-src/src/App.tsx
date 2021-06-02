@@ -67,23 +67,24 @@ class App extends Component<IAppProps, IAppState> {
 
         this.state = {
             interval: 1,
-            clipsToMultipy: 0,
-            toEndOfTheVideo: true
+            injectCount: 0,
+            untilEndOfClip: true
         }
 
         this.controller = props.controller;
         this.classes = props.classes;
 
+        this.handleStartEditClick = this.handleStartEditClick.bind(this);
         this.handleIntervalChange = this.handleIntervalChange.bind(this);
-        this.handleClipsToMultipyChange = this.handleClipsToMultipyChange.bind(this);
-        this.handleToEndOfTheVideoChange = this.handleToEndOfTheVideoChange.bind(this);
+        this.handleinjectCountChange = this.handleinjectCountChange.bind(this);
+        this.handleuntilEndOfClipChange = this.handleuntilEndOfClipChange.bind(this);
     }
 
     private removeNotNumbers(str: string): string {
         return str.replace(/[^0-9]/g, '');
     }
 
-    private onClickEditStartBtn = async (): Promise<void> => {
+    private handleStartEditClick = async (): Promise<void> => {
         try {
             const result = await this.controller.startEdit(this.state);
             console.log(result);
@@ -99,16 +100,16 @@ class App extends Component<IAppProps, IAppState> {
         });
     }
 
-    private handleClipsToMultipyChange(e: ChangeEvent<HTMLInputElement>) {
+    private handleinjectCountChange(e: ChangeEvent<HTMLInputElement>) {
         const onlyNums = this.removeNotNumbers(e.target.value);
         this.setState({
-            clipsToMultipy: +onlyNums
+            injectCount: +onlyNums
         });
     }
 
-    private handleToEndOfTheVideoChange(e: ChangeEvent<HTMLInputElement>) {
+    private handleuntilEndOfClipChange(e: ChangeEvent<HTMLInputElement>) {
         this.setState({
-            toEndOfTheVideo: e.target.checked
+            untilEndOfClip: e.target.checked
         });
     }
 
@@ -118,24 +119,24 @@ class App extends Component<IAppProps, IAppState> {
                 <MuiThemeProvider theme={theme}>
                     <div className={this.classes.flexContainer}>
                         <TextField
-                            label="Time interval between clips (seconds)"
+                            label="Gap between clips (seconds)"
                             onChange={this.handleIntervalChange}
                             value={this.state.interval} />
                         <TextField
-                            label="Number of clips to multipy"
-                            disabled={this.state.toEndOfTheVideo}
-                            onChange={this.handleClipsToMultipyChange}
-                            value={this.state.clipsToMultipy} />
+                            label="Number of clips to inject"
+                            disabled={this.state.untilEndOfClip}
+                            onChange={this.handleinjectCountChange}
+                            value={this.state.injectCount} />
                         <FormGroup>
                             <FormControlLabel
-                                label="To end of the video"
+                                label="until end of clip"
                                 control={
                                     <Checkbox
-                                        name="toEndOfTheVideo"
-                                        checked={this.state.toEndOfTheVideo}
-                                        onChange={this.handleToEndOfTheVideoChange} />} />
+                                        name="untilEndOfClip"
+                                        checked={this.state.untilEndOfClip}
+                                        onChange={this.handleuntilEndOfClipChange} />} />
                         </FormGroup>
-                        <Button onClick={this.onClickEditStartBtn}>
+                        <Button onClick={this.handleStartEditClick}>
                             StartEdit
                         </Button>
                     </div>

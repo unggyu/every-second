@@ -23,9 +23,20 @@ interface ITestHostWithParamsParameter {
 }
 
 interface IStartEditParameter {
+    /**
+     * Gap between clips (seconds)
+     */
     interval: number;
-    clipsToMultipy: number;
-    toEndOfTheVideo: boolean;
+
+    /**
+     * Number of clips to inject
+     */
+    injectCount: number;
+
+    /**
+     * Until the end of the clip
+     */
+    untilEndOfClip: boolean;
 }
 
 interface IScriptResultPayload<TResult = undefined> {

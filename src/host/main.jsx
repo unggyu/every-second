@@ -28,15 +28,20 @@ $._ES_ = {
 
 		return stringify(payload);
 	},
-	testHostWithParam: function(paramStr) {
+	testHostWithParam: function(param) {
 		var payload = {};
 		
 		try {
-			var parameter = decodeURIComponent(paramStr);
-			var parameterObj = JSON.parse(parameter);
+			var paramStr;
+			if (typeof param === 'string') {
+				paramStr = decodeURIComponent(param);
+				param = JSON.parse(paramStr);
+			} else {
+				paramStr = JSON.stringify(param);
+			}
 			payload.result = {};
-			payload.result.parameter = parameter;
-			payload.result.data = 'hola from extendscript ' + parameterObj.name;
+			payload.result.parameter = paramStr;
+			payload.result.data = 'hola from extendscript ' + param.name;
 			payload.status = SUCCESS;
 		} catch (err) {
 			payload.status = FAILURE;
@@ -102,7 +107,7 @@ $._ES_ = {
 			// Finding the number of tracks needed to inject a clip
 			var endTime = 0;
 			var trackCountToAdd;
-			if (param.toEndOfTheVideo) {
+			if (param.untilEndOfClip) {
 				var qeClip = qe.source.clip;
 				var frameRate = Math.round(qeClip.videoFrameRate);
 				var hmst = qeClip.duration.split(':');
@@ -111,7 +116,7 @@ $._ES_ = {
 				endTime += hmst[2] * 1;		  // second
 				trackCountToAdd = parseInt(endTime / param.interval) - videoTracks.numTracks;
 			} else {
-				trackCountToAdd = param.clipsToMultipy - videoTracks.numTracks;
+				trackCountToAdd = param.injectCount - videoTracks.numTracks;
 			}
 
 			// Add a track using the qe object
@@ -135,7 +140,7 @@ $._ES_ = {
 			}
 
 			var currentTime = param.interval;
-			if (param.toEndOfTheVideo) {
+			if (param.untilEndOfClip) {
 				// injection till the end of the video
 				var currentTime = param.interval;
 				for (var i = 0; currentTime < endTime; i++) {
@@ -144,7 +149,7 @@ $._ES_ = {
 				}
 			} else {
 				// Inject as many as the number of injections entered as parameters
-				for (var i = 0; i < param.clipsToMultipy; i++) {
+				for (var i = 0; i < param.injectCount; i++) {
 					videoTracks[i].insertClip(clip, currentTime);
 					currentTime += param.interval;
 				}
@@ -161,12 +166,30 @@ $._ES_ = {
 }
 
 $._EST_ = {
+	testHostTest: function() {
+		try {
+			var result = $._ES_.testHost();
+			alert(decodeURIComponent(result));
+		} catch (err) {
+			alert(JSON.stringify(err));
+		}
+	},
+	testHostWithParamTest: function() {
+		try {
+			var result = $._ES_.testHostWithParam({
+				name: 'john'
+			});
+			alert(decodeURIComponent(result));
+		} catch (err) {
+			alert(JSON.stringify(err));
+		}
+	},
 	startEditTest: function() {
 		try {
 			var result = $._ES_.startEdit({
 				interval: 1,
-				clipsToMultipy: 0,
-				toEndOfTheVideo: true
+				injectCount: 0,
+				untilEndOfClip: true
 			});
 			alert(decodeURIComponent(result));
 		} catch (err) {
@@ -175,4 +198,5 @@ $._EST_ = {
 	}
 }
 
+// $._EST_.testHostWithParamTest();
 // $._EST_.startEditTest();
