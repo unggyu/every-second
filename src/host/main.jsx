@@ -59,11 +59,11 @@ $._ES_ = {
 			}
 			// Enable qe to use the qe object
 			app.enableQE();
-			var activeSeq = app.project.activeSequence;
-			var videoTracks = activeSeq.videoTracks;
+			var videoTracks = app.project.activeSequence.videoTracks;
 			
 			// Finding the number of tracks needed to inject a clip
 			var endTime = 0;
+			var endTick = 0;
 			var trackCountToAdd;
 			if (param.untilEndOfClip) {
 				var qeClip = qe.source.clip;
@@ -72,6 +72,7 @@ $._ES_ = {
 				endTime += hmst[0] * 60 * 60; // hour
 				endTime += hmst[1] * 60;	  // minute
 				endTime += hmst[2] * 1;		  // second
+				endTick = TIME_COEFFICIENT * endTime;
 				trackCountToAdd = parseInt(endTime / param.interval) - videoTracks.numTracks;
 			} else {
 				trackCountToAdd = param.injectCount - videoTracks.numTracks;
@@ -86,10 +87,10 @@ $._ES_ = {
 
 			// Find and inject the same clip as qeclip
 			var clip;
-			var projectItemCollection = app.project.rootItem.children;
-			for (var i = 0; i < projectItemCollection.numItems; i++) {
-				if (projectItemCollection[i].name === qe.source.clip.name) {
-					clip = projectItemCollection[i];
+			var clipCollection = app.project.rootItem.children;
+			for (var i = 0; i < clipCollection.numItems; i++) {
+				if (clipCollection[i].name === qe.source.clip.name) {
+					clip = clipCollection[i];
 				}
 			}
 
@@ -101,17 +102,27 @@ $._ES_ = {
 			if (param.untilEndOfClip) {
 				// injection till the end of the video
 				for (var i = 0; currentTime < endTime; i++) {
+					if (param.trimEnd && currentTime !== 0) {
+						var outPoint = clip.getOutPoint();
+						outPoint.seconds -= param.interval;
+						clip.setOutPoint(outPoint, 4);
+					}
 					videoTracks[i].insertClip(clip, currentTime);
 					currentTime += param.interval;
 				}
 			} else {
 				// Inject as many as the number of injections entered as parameters
 				for (var i = 0; i < param.injectCount; i++) {
+					if (param.trimEnd && currentTime !== 0) {
+						var outPoint = clip.getOutPoint();
+						outPoint.seconds -= param.interval;
+						clip.setOutPoint(outPoint, 4);
+					}
 					videoTracks[i].insertClip(clip, currentTime);
 					currentTime += param.interval;
 				}
 			}
-
+			clip.clearOutPoint();
 			payload.status = SUCCESS;
 		} catch (err) {
 			payload.status = FAILURE;
@@ -188,7 +199,8 @@ $._EST_ = {
 			var result = $._ES_.startEdit({
 				interval: 1,
 				injectCount: 0,
-				untilEndOfClip: true
+				untilEndOfClip: true,
+				trimEnd: true
 			});
 			alert(decodeURIComponent(result));
 		} catch (err) {
