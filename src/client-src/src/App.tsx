@@ -68,7 +68,8 @@ class App extends Component<IAppProps, IAppState> {
         this.state = {
             interval: 1,
             injectCount: 0,
-            untilEndOfClip: true
+            untilEndOfClip: true,
+            trimEnd: true
         }
 
         this.controller = props.controller;
@@ -77,7 +78,8 @@ class App extends Component<IAppProps, IAppState> {
         this.handleStartEditClick = this.handleStartEditClick.bind(this);
         this.handleIntervalChange = this.handleIntervalChange.bind(this);
         this.handleinjectCountChange = this.handleinjectCountChange.bind(this);
-        this.handleuntilEndOfClipChange = this.handleuntilEndOfClipChange.bind(this);
+        this.handleUntilEndOfClipChange = this.handleUntilEndOfClipChange.bind(this);
+        this.handleTrimEndChange = this.handleTrimEndChange.bind(this);
     }
 
     private removeNotNumbers(str: string): string {
@@ -107,9 +109,15 @@ class App extends Component<IAppProps, IAppState> {
         });
     }
 
-    private handleuntilEndOfClipChange(e: ChangeEvent<HTMLInputElement>) {
+    private handleUntilEndOfClipChange(e: ChangeEvent<HTMLInputElement>) {
         this.setState({
             untilEndOfClip: e.target.checked
+        });
+    }
+
+    private handleTrimEndChange(e: ChangeEvent<HTMLInputElement>) {
+        this.setState({
+            trimEnd: e.target.checked
         });
     }
 
@@ -129,12 +137,19 @@ class App extends Component<IAppProps, IAppState> {
                             value={this.state.injectCount} />
                         <FormGroup>
                             <FormControlLabel
-                                label="until end of clip"
+                                label="Until end of clip"
                                 control={
                                     <Checkbox
                                         name="untilEndOfClip"
                                         checked={this.state.untilEndOfClip}
-                                        onChange={this.handleuntilEndOfClipChange} />} />
+                                        onChange={this.handleUntilEndOfClipChange} />} />
+                            <FormControlLabel
+                                label="Trim end"
+                                control={
+                                    <Checkbox
+                                        name="trimEnd"
+                                        checked={this.state.trimEnd}
+                                        onChange={this.handleTrimEndChange} />} />
                         </FormGroup>
                         <Button onClick={this.handleStartEditClick}>
                             StartEdit

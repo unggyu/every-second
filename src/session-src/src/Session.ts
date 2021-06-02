@@ -37,6 +37,11 @@ interface IStartEditParameter {
      * Until the end of the clip
      */
     untilEndOfClip: boolean;
+
+    /**
+     * Whether to trim the last part of the injected clip
+     */
+    trimEnd: boolean;
 }
 
 interface IScriptResultPayload<TResult = undefined> {
