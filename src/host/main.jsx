@@ -50,48 +50,6 @@ $._ES_ = {
 
 		return stringify(payload);
 	},
-	getProjectItemsLength: function() {
-		var payload = {};
-
-		try {
-			payload.result = app.project.rootItem.children.length;
-			payload.status = SUCCESS;
-		} catch (err) {
-			payload.status = FAILURE;
-			payload.error = err;
-		}
-
-		return stringify(payload);
-	},
-	getProjectItem: function(index) {
-		var payload = {};
-
-		try {
-			payload.result = app.project.rootItem.children[index];
-			payload.status = SUCCESS;
-		} catch (err) {
-			payload.status = FAILURE;
-			payload.error = err;
-		}
-
-		return stringify(payload);
-	},
-	addTrack: function() {
-		var payload = {};
-
-		try {
-			app.enableQE();
-			var activeSeq = qe.project.getActiveSequence();
-			// 1 audio track, 1 video track
-			activeSeq.addTracks(1);
-			payload.status = SUCCESS;
-		} catch (err) {
-			payload.status = FAILURE;
-			payload.error = err;
-		}
-
-		return stringify(payload);
-	},
 	startEdit: function(param) {
 		var payload = {};
 
@@ -139,10 +97,9 @@ $._ES_ = {
 				throw new Error('Clip not found');
 			}
 
-			var currentTime = param.interval;
+			var currentTime = 0;
 			if (param.untilEndOfClip) {
 				// injection till the end of the video
-				var currentTime = param.interval;
 				for (var i = 0; currentTime < endTime; i++) {
 					videoTracks[i].insertClip(clip, currentTime);
 					currentTime += param.interval;
@@ -162,7 +119,49 @@ $._ES_ = {
 		}
 
 		return stringify(payload);
-	}
+	},
+	getProjectItemsLength: function() {
+		var payload = {};
+
+		try {
+			payload.result = app.project.rootItem.children.length;
+			payload.status = SUCCESS;
+		} catch (err) {
+			payload.status = FAILURE;
+			payload.error = err;
+		}
+
+		return stringify(payload);
+	},
+	getProjectItem: function(index) {
+		var payload = {};
+
+		try {
+			payload.result = app.project.rootItem.children[index];
+			payload.status = SUCCESS;
+		} catch (err) {
+			payload.status = FAILURE;
+			payload.error = err;
+		}
+
+		return stringify(payload);
+	},
+	addTrack: function() {
+		var payload = {};
+
+		try {
+			app.enableQE();
+			var activeSeq = qe.project.getActiveSequence();
+			// 1 audio track, 1 video track
+			activeSeq.addTracks(1);
+			payload.status = SUCCESS;
+		} catch (err) {
+			payload.status = FAILURE;
+			payload.error = err;
+		}
+
+		return stringify(payload);
+	},
 }
 
 $._EST_ = {
