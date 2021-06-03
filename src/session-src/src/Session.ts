@@ -22,6 +22,11 @@ interface ITestHostWithParamsParameter {
     name: string;
 }
 
+interface IAlertParameter {
+    message: string;
+    decorator: 'info' | 'warning' | 'error'
+}
+
 interface IStartEditParameter {
     /**
      * Gap between clips (seconds)
@@ -139,9 +144,9 @@ class Session {
         }
     }
 
-    public alert(message: string): Promise<IScriptResultPayload> {
+    public alert(param: IAlertParameter): Promise<IScriptResultPayload> {
         const functionName = this.attachPrefix('alert');
-        return this.evalFunction(functionName, message);
+        return this.evalFunction(functionName, param);
     }
 
     public isEditable(): Promise<IScriptResultPayload<IIsEditableResult>> {
@@ -197,6 +202,7 @@ export default Session;
 export {
     ESScriptError,
     ITestHostWithParamsParameter,
+    IAlertParameter,
     IStartEditParameter,
     IScriptResultPayload,
     ITestHostWithParamResult

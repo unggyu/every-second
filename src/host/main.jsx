@@ -50,12 +50,14 @@ $._ES_ = {
 
 		return stringify(payload);
 	},
-	alert: function(message) {
+	alert: function(param) {
 		var payload = {};
 
 		try {
-			message = decodeURIComponent(message);
-			alert(message);
+			if (typeof param === 'string') {
+				param = parse(param);
+			}
+			app.setSDKEventMessage(param.message, param.decorator);
 			payload.status = SUCCESS;
 		} catch (err) {
 			payload.status = FAILURE;

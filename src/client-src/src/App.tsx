@@ -72,9 +72,10 @@ class App extends Component<IAppProps, IAppState> {
         try {
             const result = await this.controller.startEdit(this.state);
             console.log(result);
+            this.controller.alert('Edit success', 'info');
         } catch (err) {
             console.error(err);
-            this.controller.alert(err.message);
+            this.controller.alert(err.message, 'error');
         }
     }
 

@@ -1,4 +1,4 @@
-import { Session, IStartEditParameter, IScriptResultPayload } from '../../session-src/src/index';
+import { Session, IStartEditParameter, IScriptResultPayload, IAlertParameter } from '../../session-src/src/index';
 
 declare global {
     interface Window {
@@ -43,12 +43,15 @@ class Controller {
         return this._session;
     }
 
-    public alert(message: string): Promise<IScriptResultPayload> {
+    public alert(message: IAlertParameter['message'], decorator: IAlertParameter['decorator']): Promise<IScriptResultPayload> {
         if (!this.hasSession()) {
             throw new SessionNotExistsError(this);
         }
 
-        return this.session.alert(message);
+        return this.session.alert({
+            message: message,
+            decorator: decorator
+        });
     }
 
     public async startEdit(param: IEverySecondEditData): Promise<IScriptResultPayload> {
