@@ -64,6 +64,15 @@ class App extends Component<IAppProps, IAppState> {
         this.handleTrimEndChange = this.handleTrimEndChange.bind(this);
     }
 
+    public componentDidMount() {
+        // polling selected clip
+        setInterval(this.checkSelectedClip, 1000);
+    }
+
+    private checkSelectedClip() {
+        
+    }
+
     private removeNotNumbers(str: string): string {
         return str.replace(/[^0-9]/g, '');
     }

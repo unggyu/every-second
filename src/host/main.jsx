@@ -66,6 +66,78 @@ $._ES_ = {
 
 		return stringify(payload);
 	},
+	getClip: function(name) {
+		var payload = {};
+
+		try {
+			var clip = $._ES_.getClipInternal(name);
+			if (clip === undefined) {
+				throw new Error('\'' + name + '\' clip not found');
+			} else {
+				payload.result = clip;
+			}
+		} catch (err) {
+			payload.status = FAILURE;
+			payload.error = err;
+		}
+
+		return stringify(payload);
+	},
+	getClipInternal: function(name) {
+		var clip;
+		var clipCollection = app.project.rootItem.children;
+		for (var i = 0; i < clipCollection.numItems; i++) {
+			if (clipCollection[i].name === name) {
+				clip = clipCollection[i];
+			}
+		}
+
+		return clip;
+	},
+	isSelectedClip: function() {
+		var payload = {};
+
+		try {
+			payload.result = $._ES_.isSelectedClipInternal();
+			payload.status = SUCCESS;
+		} catch (err) {
+			payload.status = FAILURE;
+			payload.error = err;
+		}
+
+		return stringify(payload);
+	},
+	isSelectedClipInternal: function() {
+		var isSelectedClip;
+		app.enableQE();
+		if (qe.source.clip === '') {
+			isSelectedClip = false;
+		} else {
+			isSelectedClip = true;
+		}
+		return isSelectedClip;
+	},
+	getSelectedClip: function() {
+		var payload = {};
+
+		try {
+			app.enableQE();
+			var name = qe.source.clip.name;
+			var clip = $._ES_.getClipInternal(name);
+			payload.result = clip;
+			payload.status = SUCCESS;
+		} catch (err) {
+			payload.status = FAILURE;
+			payload.error = err;
+		}
+
+		return stringify(payload);
+	},
+	getSelectedClipInternal: function() {
+		app.enableQE();
+		var name = qe.source.clip.name;
+		return $._ES_.getClipInternal(name);
+	},
 	isEditable: function() {
 		var payload = {};
 
@@ -76,11 +148,7 @@ $._ES_ = {
 			var isTrackEmpty = true;
 
 			// Check if source has clip
-			if (qe.source.clip.name !== '') {
-				isSelectedClip = true;
-			} else {
-				isSelectedClip = false;
-			}
+			isSelectedClip = $._ES_.isSelectedClipInternal();
 
 			// Check if there is an active sequence
 			var seq = app.project.activeSequence;
@@ -167,13 +235,7 @@ $._ES_ = {
 			}
 
 			// Find and inject the same clip as qeclip
-			var clip;
-			var clipCollection = app.project.rootItem.children;
-			for (var i = 0; i < clipCollection.numItems; i++) {
-				if (clipCollection[i].name === qe.source.clip.name) {
-					clip = clipCollection[i];
-				}
-			}
+			var clip = $._ES_.getClipInternal(qe.source.clip.name);
 
 			if (clip === undefined) {
 				throw new Error('Clip not found');
