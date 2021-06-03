@@ -4,37 +4,16 @@ import {
     TextField,
     FormGroup,
     FormControlLabel,
-    Checkbox
+    Checkbox,
+    Typography
 } from '@material-ui/core/index';
-import { pink, red, cyan } from '@material-ui/core/colors/index';
 import {
     Theme,
-    ThemeOptions,
     WithStyles,
-    MuiThemeProvider,
     createStyles,
-    withStyles,
-    createMuiTheme
+    withStyles
 } from '@material-ui/core/styles/index';
 import Controller, { IEverySecondEditData } from './Controller';
-
-let theme: Theme = createMuiTheme({
-    palette: {
-        type: 'dark',
-        primary: cyan,
-        secondary: pink,
-        error: red,
-        contrastThreshold: 3,
-        tonalOffset: 0.2,
-    },
-    status: {
-        danger: 'orange',
-    },
-    typography: {
-        // In Japanese the characters are usually larger.
-        fontSize: 12,
-    },
-} as ThemeOptions);
 
 let styles = ((theme: Theme) => createStyles({
     root: {
@@ -45,6 +24,9 @@ let styles = ((theme: Theme) => createStyles({
         display: 'flex',
         flexDirection: 'column',
         padding: '10px'
+    },
+    label: {
+        color: theme.palette.text.primary
     }
 }));
 
@@ -125,38 +107,36 @@ class App extends Component<IAppProps, IAppState> {
     render() {
         return (
             <div className={this.classes.root}>
-                <MuiThemeProvider theme={theme}>
-                    <div className={this.classes.flexContainer}>
-                        <TextField
-                            label="Gap between clips (seconds)"
-                            onChange={this.handleIntervalChange}
-                            value={this.state.interval} />
-                        <TextField
-                            label="Number of clips to inject"
-                            disabled={this.state.untilEndOfClip}
-                            onChange={this.handleinjectCountChange}
-                            value={this.state.injectCount} />
-                        <FormGroup>
-                            <FormControlLabel
-                                label="Until end of clip"
-                                control={
-                                    <Checkbox
-                                        name="untilEndOfClip"
-                                        checked={this.state.untilEndOfClip}
-                                        onChange={this.handleUntilEndOfClipChange} />} />
-                            <FormControlLabel
-                                label="Trim end"
-                                control={
-                                    <Checkbox
-                                        name="trimEnd"
-                                        checked={this.state.trimEnd}
-                                        onChange={this.handleTrimEndChange} />} />
-                        </FormGroup>
-                        <Button onClick={this.handleStartEditClick}>
-                            StartEdit
-                        </Button>
-                    </div>
-                </MuiThemeProvider>
+                <div className={this.classes.flexContainer}>
+                    <TextField
+                        label="Gap between clips (seconds)"
+                        onChange={this.handleIntervalChange}
+                        value={this.state.interval} />
+                    <TextField
+                        label="Number of clips to inject"
+                        disabled={this.state.untilEndOfClip}
+                        onChange={this.handleinjectCountChange}
+                        value={this.state.injectCount} />
+                    <FormGroup>
+                        <FormControlLabel
+                            label={<Typography className={this.classes.label}>Until end of clip</Typography>}
+                            control={
+                                <Checkbox
+                                    name="untilEndOfClip"
+                                    checked={this.state.untilEndOfClip}
+                                    onChange={this.handleUntilEndOfClipChange} />} />
+                        <FormControlLabel
+                            label={<Typography className={this.classes.label}>Trim end</Typography>}
+                            control={
+                                <Checkbox
+                                    name="trimEnd"
+                                    checked={this.state.trimEnd}
+                                    onChange={this.handleTrimEndChange} />} />
+                    </FormGroup>
+                    <Button onClick={this.handleStartEditClick}>
+                        StartEdit
+                    </Button>
+                </div>
             </div>
         );
     }
