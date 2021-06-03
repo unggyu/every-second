@@ -56,6 +56,11 @@ interface ITestHostWithParamResult {
     data: string;
 }
 
+interface IIsEditableResult {
+    isEditable: boolean;
+    reason: string;
+}
+
 /**
  * the main plugin session. This can enter the node modules as
  * well as the host
@@ -85,6 +90,14 @@ class Session {
 
     public get managers(): DataManagers {
         return this._managers;
+    }
+
+    public get success(): string {
+        return 'success';
+    }
+
+    public get failure(): string {
+        return 'failure';
     }
 
     public async init(): Promise<void> {
@@ -126,24 +139,19 @@ class Session {
         }
     }
 
-    public getProjectItemsLength(): Promise<IScriptResultPayload<number>> {
-        const functionName = this.attachPrefix('getProjectItemsLength');
+    public alert(message: string): Promise<IScriptResultPayload> {
+        const functionName = this.attachPrefix('alert');
+        return this.evalFunction(functionName, message);
+    }
+
+    public isEditable(): Promise<IScriptResultPayload<IIsEditableResult>> {
+        const functionName = this.attachPrefix('isEditable');
         return this.evalFunction(functionName);
     }
 
-    public getProjectItem(index: number): Promise<IScriptResultPayload<ProjectItem>> {
-        const functionName = this.attachPrefix('getProjectItem');
-        return this.evalFunction(functionName, index);
-    }
-
-    public addTrack(): Promise<IScriptResultPayload> {
-        const functionName = this.attachPrefix('addTrack');
-        return this.evalFunction(functionName);
-    }
-
-    public startEdit(params: IStartEditParameter): Promise<IScriptResultPayload> {
+    public startEdit(param: IStartEditParameter): Promise<IScriptResultPayload> {
         const functionName = this.attachPrefix('startEdit');
-        return this.evalFunction(functionName, params);
+        return this.evalFunction(functionName, param);
     }
 
     private async evalFunction<TParameter extends number | string | object | undefined = undefined, TResult = undefined>(functionName: string, param?: TParameter): Promise<IScriptResultPayload<TResult>> {

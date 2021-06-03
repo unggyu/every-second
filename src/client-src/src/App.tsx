@@ -92,6 +92,7 @@ class App extends Component<IAppProps, IAppState> {
             console.log(result);
         } catch (err) {
             console.error(err);
+            this.controller.alert(err.message);
         }
     }
 

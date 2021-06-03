@@ -35,20 +35,37 @@ class Controller {
         Controller.instance = this;
     }
 
-    get name(): string {
+    public get name(): string {
         return 'Client Controller:: ';
     }
 
-    get session(): Session {
+    public get session(): Session {
         return this._session;
     }
 
-    startEdit(params: IEverySecondEditData): Promise<IScriptResultPayload> {
+    public alert(message: string): Promise<IScriptResultPayload> {
         if (!this.hasSession()) {
             throw new SessionNotExistsError(this);
         }
 
-        return this.session.startEdit(params);
+        return this.session.alert(message);
+    }
+
+    public async startEdit(param: IEverySecondEditData): Promise<IScriptResultPayload> {
+        if (!this.hasSession()) {
+            throw new SessionNotExistsError(this);
+        }
+
+        var isEditablePayload = await this.session.isEditable();
+        if (isEditablePayload.status === this.session.success && isEditablePayload.result !== undefined) {
+            if (isEditablePayload.result.isEditable) {
+                return this.session.startEdit(param);
+            } else {
+                throw new Error(isEditablePayload.result.reason);
+            }
+        } else {
+            throw new Error(JSON.stringify(isEditablePayload.error));
+        }
     }
 
     private init(): void {

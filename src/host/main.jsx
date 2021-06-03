@@ -50,6 +50,85 @@ $._ES_ = {
 
 		return stringify(payload);
 	},
+	alert: function(message) {
+		var payload = {};
+
+		try {
+			message = decodeURIComponent(message);
+			alert(message);
+			payload.status = SUCCESS;
+		} catch (err) {
+			payload.status = FAILURE;
+			payload.error = err;
+		}
+
+		return stringify(payload);
+	},
+	isEditable: function() {
+		var payload = {};
+
+		try {
+			app.enableQE();
+			var isSelectedClip;
+			var isActiveSequenceExists;
+			var isTrackEmpty = true;
+
+			// Check if source has clip
+			if (qe.source.clip.name !== '') {
+				isSelectedClip = true;
+			} else {
+				isSelectedClip = false;
+			}
+
+			// Check if there is an active sequence
+			var seq = app.project.activeSequence;
+			if (seq !== null) {
+				isActiveSequenceExists = true;
+			} else {
+				isActiveSequenceExists = false;
+			}
+
+			if (isActiveSequenceExists) {
+				var maxTracksNum;
+				if (seq.videoTracks.numTracks > seq.audioTracks.numTracks) {
+					maxTracksNum = seq.videoTracks.numTracks;
+				} else {
+					maxTracksNum = seq.audioTracks.numTracks;
+				}
+
+				for (var i = 0; i < maxTracksNum; i++) {
+					var videoTrack = seq.videoTracks[i];
+					var audioTrack = seq.audioTracks[i];
+					if (videoTrack !== null && videoTrack.clips.numItems !== 0) {
+						isTrackEmpty = false;
+						break;
+					}
+					if (audioTrack !== null && audioTrack.clips.numItems !== 0 ) {
+						isTrackEmpty = false;
+						break;	
+					}
+				}
+			}
+
+			payload.result = {};
+			payload.result.isEditable = isSelectedClip && isActiveSequenceExists && isTrackEmpty;
+			if (!payload.result.isEditable) {
+				if (!isSelectedClip) {
+					payload.result.reason = 'No clip selected';
+				} else if (!isActiveSequenceExists) {
+					payload.result.reason = 'No sequence active';
+				} else if (!isTrackEmpty) {
+					payload.result.reason = 'Track not empty';
+				}
+			}
+			payload.status = SUCCESS;
+		} catch (err) {
+			payload.status = FAILURE;
+			payload.error = err;
+		}
+
+		return stringify(payload);
+	},
 	startEdit: function(param) {
 		var payload = {};
 
@@ -194,6 +273,14 @@ $._EST_ = {
 			alert(JSON.stringify(err));
 		}
 	},
+	isEditableTest: function() {
+		try {
+			var result = $._ES_.isEditable();
+			alert(decodeURIComponent(result));
+		} catch (err) {
+			alert(JSON.stringify(err));
+		}
+	},
 	startEditTest: function() {
 		try {
 			var result = $._ES_.startEdit({
@@ -210,4 +297,5 @@ $._EST_ = {
 }
 
 // $._EST_.testHostWithParamTest();
+// $._EST_.isEditableTest();
 // $._EST_.startEditTest();
