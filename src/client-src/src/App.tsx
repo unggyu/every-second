@@ -13,6 +13,7 @@ import {
     createStyles,
     withStyles
 } from '@material-ui/core/styles/index';
+import Clip from './components/Clip';
 import Controller, { IEverySecondEditData } from './Controller';
 
 let styles = ((theme: Theme) => createStyles({
@@ -34,7 +35,10 @@ interface IAppProps extends WithStyles<typeof styles> {
     controller: Controller;
 }
 
-interface IAppState extends IEverySecondEditData {}
+interface IAppState extends IEverySecondEditData {
+    isClipSelected: boolean;
+    selectedClip?: ProjectItem;
+}
 
 /**
  * main app component
@@ -51,7 +55,8 @@ class App extends Component<IAppProps, IAppState> {
             interval: 1,
             injectCount: 0,
             untilEndOfClip: true,
-            trimEnd: true
+            trimEnd: true,
+            isClipSelected: false
         }
 
         this.controller = props.controller;
@@ -69,8 +74,28 @@ class App extends Component<IAppProps, IAppState> {
         setInterval(this.checkSelectedClip, 1000);
     }
 
-    private checkSelectedClip() {
-        
+    private async checkSelectedClip() {
+        try {
+            var isSelected = await this.controller.isClipSelected();
+            if (isSelected !== this.state.isClipSelected) {
+                this.setState({
+                    isClipSelected: isSelected
+                });
+
+                if (isSelected) {
+                    var clip = await this.controller.getSelectedClip();
+                    this.setState({
+                        selectedClip: clip
+                    });
+                } else {
+                    this.setState({
+                        selectedClip: undefined 
+                    });
+                }
+            }
+        } catch (err) {
+            this.controller.alert(err, 'error');
+        }
     }
 
     private removeNotNumbers(str: string): string {
@@ -115,32 +140,48 @@ class App extends Component<IAppProps, IAppState> {
     }
 
     render() {
+        const {
+            interval,
+            injectCount,
+            untilEndOfClip,
+            trimEnd,
+            isClipSelected,
+            selectedClip
+        } = this.state;
+
         return (
             <div className={this.classes.root}>
                 <div className={this.classes.flexContainer}>
+                    {isClipSelected ? (
+                        <Clip title="Selected Clip" clip={selectedClip} />
+                    ) : (
+                        <Typography>
+                            Clip not selected
+                        </Typography>
+                    )}
                     <TextField
                         label="Gap between clips (seconds)"
                         onChange={this.handleIntervalChange}
-                        value={this.state.interval} />
+                        value={interval} />
                     <TextField
                         label="Number of clips to inject"
-                        disabled={this.state.untilEndOfClip}
+                        disabled={untilEndOfClip}
                         onChange={this.handleinjectCountChange}
-                        value={this.state.injectCount} />
+                        value={injectCount} />
                     <FormGroup>
                         <FormControlLabel
                             label={<Typography className={this.classes.label}>Until end of clip</Typography>}
                             control={
                                 <Checkbox
                                     name="untilEndOfClip"
-                                    checked={this.state.untilEndOfClip}
+                                    checked={untilEndOfClip}
                                     onChange={this.handleUntilEndOfClipChange} />} />
                         <FormControlLabel
                             label={<Typography className={this.classes.label}>Trim end</Typography>}
                             control={
                                 <Checkbox
                                     name="trimEnd"
-                                    checked={this.state.trimEnd}
+                                    checked={trimEnd}
                                     onChange={this.handleTrimEndChange} />} />
                     </FormGroup>
                     <Button onClick={this.handleStartEditClick}>

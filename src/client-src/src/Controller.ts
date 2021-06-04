@@ -54,6 +54,28 @@ class Controller {
         });
     }
 
+    public async isClipSelected(): Promise<boolean> {
+        if (!this.hasSession()) {
+            throw new SessionNotExistsError(this);
+        }
+
+        var payload = await this.session.isClipSelected();
+        return payload.result ?? false;
+    }
+
+    public async getSelectedClip(): Promise<ProjectItem> {
+        if (!this.hasSession()) {
+            throw new SessionNotExistsError(this);
+        }
+
+        var payload = await this.session.getSelectedClip();
+        var clip = payload.result;
+        if (clip === undefined) {
+            throw new Error('result is undefined');
+        }
+        return clip;
+    }
+
     public async startEdit(param: IEverySecondEditData): Promise<IScriptResultPayload> {
         if (!this.hasSession()) {
             throw new SessionNotExistsError(this);

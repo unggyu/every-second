@@ -94,11 +94,11 @@ $._ES_ = {
 
 		return clip;
 	},
-	isSelectedClip: function() {
+	isClipSelected: function() {
 		var payload = {};
 
 		try {
-			payload.result = $._ES_.isSelectedClipInternal();
+			payload.result = $._ES_.isClipSelectedInternal();
 			payload.status = SUCCESS;
 		} catch (err) {
 			payload.status = FAILURE;
@@ -107,15 +107,15 @@ $._ES_ = {
 
 		return stringify(payload);
 	},
-	isSelectedClipInternal: function() {
-		var isSelectedClip;
+	isClipSelectedInternal: function() {
+		var isClipSelected;
 		app.enableQE();
 		if (qe.source.clip === '') {
-			isSelectedClip = false;
+			isClipSelected = false;
 		} else {
-			isSelectedClip = true;
+			isClipSelected = true;
 		}
-		return isSelectedClip;
+		return isClipSelected;
 	},
 	getSelectedClip: function() {
 		var payload = {};
@@ -143,12 +143,12 @@ $._ES_ = {
 
 		try {
 			app.enableQE();
-			var isSelectedClip;
+			var isClipSelected;
 			var isActiveSequenceExists;
 			var isTrackEmpty = true;
 
 			// Check if source has clip
-			isSelectedClip = $._ES_.isSelectedClipInternal();
+			isClipSelected = $._ES_.isClipSelectedInternal();
 
 			// Check if there is an active sequence
 			var seq = app.project.activeSequence;
@@ -181,9 +181,9 @@ $._ES_ = {
 			}
 
 			payload.result = {};
-			payload.result.isEditable = isSelectedClip && isActiveSequenceExists && isTrackEmpty;
+			payload.result.isEditable = isClipSelected && isActiveSequenceExists && isTrackEmpty;
 			if (!payload.result.isEditable) {
-				if (!isSelectedClip) {
+				if (!isClipSelected) {
 					payload.result.reason = 'No clip selected';
 				} else if (!isActiveSequenceExists) {
 					payload.result.reason = 'No sequence active';
@@ -337,6 +337,30 @@ $._EST_ = {
 			alert(JSON.stringify(err));
 		}
 	},
+	isClipSelectedInternalTest: function() {
+		try {
+			var isSelected = $._ES_.isClipSelectedInternal();
+			alert(isSelected.toString());
+		} catch (err) {
+			alert(JSON.stringify(err));
+		}
+	},
+	getClipInternalTest: function() {
+		try {
+			var result = $._ES_.getClipInternal('Shia LaBeouf  Just Do It  Motivational Speech (Original Video by LaBeouf, Rönkkö & Turner).mp4');
+			alert(JSON.stringify(result.name));
+		} catch (err) {
+			alert(JSON.stringify(err));
+		}
+	},
+	getSelectedClipInternal: function() {
+		try {
+			var result = $._ES_.getSelectedClipInternal();
+			alert(JSON.stringify(result.name));
+		} catch (err) {
+			alert(JSON.stringify(err));
+		}
+	},
 	isEditableTest: function() {
 		try {
 			var result = $._ES_.isEditable();
@@ -361,5 +385,8 @@ $._EST_ = {
 }
 
 // $._EST_.testHostWithParamTest();
+// $._EST_.getClipInternalTest();
+// $._EST_.isClipSelectedInternalTest();
+// $._EST_.getSelectedClipInternal();
 // $._EST_.isEditableTest();
 // $._EST_.startEditTest();

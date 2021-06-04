@@ -149,6 +149,16 @@ class Session {
         return this.evalFunction(functionName, param);
     }
 
+    public isClipSelected(): Promise<IScriptResultPayload<boolean>> {
+        const functionName = this.attachPrefix('isClipSelected');
+        return this.evalFunction(functionName);
+    }
+
+    public getSelectedClip(): Promise<IScriptResultPayload<ProjectItem>> {
+        const functionName = this.attachPrefix('getSelectedClip');
+        return this.evalFunction(functionName);
+    }
+
     public isEditable(): Promise<IScriptResultPayload<IIsEditableResult>> {
         const functionName = this.attachPrefix('isEditable');
         return this.evalFunction(functionName);
