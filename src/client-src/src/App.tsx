@@ -62,6 +62,7 @@ class App extends Component<IAppProps, IAppState> {
         this.controller = props.controller;
         this.classes = props.classes;
 
+        this.checkSelectedClip = this.checkSelectedClip.bind(this);
         this.handleStartEditClick = this.handleStartEditClick.bind(this);
         this.handleIntervalChange = this.handleIntervalChange.bind(this);
         this.handleinjectCountChange = this.handleinjectCountChange.bind(this);

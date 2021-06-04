@@ -23,56 +23,57 @@ interface IClipProps extends WithStyles<typeof styles> {
     clip?: ProjectItem;
 }
 
-interface IClipState {
-    title: string;
-    clip?: ProjectItem;
-}
-
-class Clip extends Component<IClipProps, IClipState> {
+class Clip extends Component<IClipProps> {
     private classes: IClipProps['classes'];
 
     constructor(props: IClipProps) {
         super(props);
 
-        this.state = {
-            title: props.title,
-            clip: props.clip
-        };
-
         this.classes = props.classes;
     }
 
     render() {
-        const {
-            name,
-            nodeId
-        } = this.state.clip ?? new ProjectItem();
+        if (this.props.clip !== undefined) {
+            const {
+                name,
+                nodeId
+            } = this.props.clip;
 
-        return (
-            <Card className={this.classes.root}>
-                <CardContent>
-                    <Typography
-                        className={this.classes.title}
-                        color="textSecondary"
-                        gutterBottom>
-                        {this.state.title}
-                    </Typography>
-                    <Typography variant="h5" component="h2">
-                        {name}
-                    </Typography>
-                    <Tooltip title="Node Id">
-                        <Typography color="textSecondary">
-                            {nodeId}
+            return (
+                <Card className={this.classes.root}>
+                    <CardContent>
+                        <Typography
+                            className={this.classes.title}
+                            color="textSecondary"
+                            gutterBottom>
+                            {this.props.title}
                         </Typography>
-                    </Tooltip>
-                </CardContent>
-            </Card>
-        );
+                        <Typography variant="h5" component="h2">
+                            {name}
+                        </Typography>
+                        <Tooltip title="Node Id">
+                            <Typography color="textSecondary">
+                                {nodeId}
+                            </Typography>
+                        </Tooltip>
+                    </CardContent>
+                </Card>
+            );
+        } else {
+            return (
+                <Card className={this.classes.root}>
+                    <CardContent>
+                        <Typography>
+                            No clip
+                        </Typography>
+                    </CardContent>
+                </Card>
+            )
+        }
     }
 }
 
 export default withStyles(styles)(Clip);
 export {
-    IClipProps,
-    IClipState
+    IClipProps
 }
