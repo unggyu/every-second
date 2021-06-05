@@ -53,6 +53,8 @@ interface IAppState extends IEverySecondEditData {
 class App extends Component<IAppProps, IAppState> {
     private controller: Controller;
     private classes: IAppProps['classes'];
+    private checkSelectedClipTimeout: NodeJS.Timeout;
+    private checkSelectedClipChangedTimeout: NodeJS.Timeout;
     private minInterval: number;
     private maxInterval: number;
     private minInjectCount: number;
@@ -77,6 +79,7 @@ class App extends Component<IAppProps, IAppState> {
         this.maxInjectCount = 100;
 
         this.checkSelectedClip = this.checkSelectedClip.bind(this);
+        this.checkSelectedClipChanged = this.checkSelectedClipChanged.bind(this);
         this.trimInterval = this.trimInterval.bind(this);
         this.trimInjectCount = this.trimInjectCount.bind(this);
         this.handleStartEditClick = this.handleStartEditClick.bind(this);
@@ -90,12 +93,17 @@ class App extends Component<IAppProps, IAppState> {
 
     public componentDidMount() {
         // polling selected clip
-        setInterval(this.checkSelectedClip, 1000);
+        this.checkSelectedClipTimeout = setInterval(this.checkSelectedClip, 1000);
+    }
+
+    public componentWillUnmount() {
+        clearInterval(this.checkSelectedClipTimeout);
+        clearInterval(this.checkSelectedClipChangedTimeout);
     }
 
     private async checkSelectedClip() {
         try {
-            var isSelected = await this.controller.isClipSelected();
+            const isSelected = await this.controller.isClipSelected();
             if (isSelected !== this.state.isClipSelected) {
                 this.setState({
                     isClipSelected: isSelected
@@ -106,10 +114,12 @@ class App extends Component<IAppProps, IAppState> {
                     this.setState({
                         selectedClip: clip
                     });
+                    this.checkSelectedClipChangedTimeout = setInterval(this.checkSelectedClipChanged, 1000);
                 } else {
                     this.setState({
                         selectedClip: undefined 
                     });
+                    clearInterval(this.checkSelectedClipChangedTimeout);
                 }
             }
         } catch (err) {
@@ -117,8 +127,21 @@ class App extends Component<IAppProps, IAppState> {
         }
     }
 
-    private removeNotNumbers(str: string): string {
-        return str.replace(/[^0-9]/g, '');
+    private async checkSelectedClipChanged() {
+        try {
+            const clip = await this.controller.getSelectedClip();
+            const {
+                selectedClip
+            } = this.state;
+
+            if (clip && selectedClip && clip.nodeId !== selectedClip.nodeId) {
+                this.setState({
+                    selectedClip: clip
+                });
+            }
+        } catch (err) {
+            this.controller.alert(err, 'error');
+        }
     }
 
     private trimInterval(interval: number): number {
