@@ -44,6 +44,7 @@ interface IAppProps extends WithStyles<typeof styles> {
 interface IAppState extends IEverySecondEditData {
     isClipSelected: boolean;
     selectedClip?: ProjectItem;
+    canEdit: boolean;
 }
 
 /**
@@ -68,7 +69,8 @@ class App extends Component<IAppProps, IAppState> {
             injectCount: 0,
             untilEndOfClip: true,
             trimEnd: true,
-            isClipSelected: false
+            isClipSelected: false,
+            canEdit: false
         }
 
         this.controller = props.controller;
@@ -106,7 +108,8 @@ class App extends Component<IAppProps, IAppState> {
             const isSelected = await this.controller.isClipSelected();
             if (isSelected !== this.state.isClipSelected) {
                 this.setState({
-                    isClipSelected: isSelected
+                    isClipSelected: isSelected,
+                    canEdit: isSelected
                 });
 
                 if (isSelected) {
@@ -252,7 +255,8 @@ class App extends Component<IAppProps, IAppState> {
             untilEndOfClip,
             trimEnd,
             isClipSelected,
-            selectedClip
+            selectedClip,
+            canEdit
         } = this.state;
 
         return (
@@ -333,7 +337,9 @@ class App extends Component<IAppProps, IAppState> {
                                     checked={trimEnd}
                                     onChange={this.handleTrimEndChange} />} />
                     </FormGroup>
-                    <Button onClick={this.handleStartEditClick}>
+                    <Button
+                        disabled={!canEdit}
+                        onClick={this.handleStartEditClick}>
                         StartEdit
                     </Button>
                 </div>
