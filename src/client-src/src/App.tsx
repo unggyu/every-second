@@ -26,9 +26,12 @@ let styles = ((theme: Theme) => createStyles({
         flexDirection: 'column',
         padding: '10px'
     },
+    clip: {
+        marginBottom: '16px'
+    },
     label: {
         color: theme.palette.text.primary
-    }
+    },
 }));
 
 interface IAppProps extends WithStyles<typeof styles> {
@@ -154,9 +157,9 @@ class App extends Component<IAppProps, IAppState> {
             <div className={this.classes.root}>
                 <div className={this.classes.flexContainer}>
                     {isClipSelected ? (
-                        <Clip title="Selected Clip" clip={selectedClip} />
+                        <Clip className={this.classes.clip} title="Selected Clip" clip={selectedClip} />
                     ) : (
-                        <Typography>
+                        <Typography color="error" gutterBottom>
                             Clip not selected
                         </Typography>
                     )}

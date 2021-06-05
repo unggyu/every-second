@@ -110,7 +110,9 @@ $._ES_ = {
 	isClipSelectedInternal: function() {
 		var isClipSelected;
 		app.enableQE();
-		if (qe.source.clip === '') {
+		if (qe.source.clip.name === '' &&
+			qe.source.clip.duration === '' &&
+			qe.source.clip.filePath === '') {
 			isClipSelected = false;
 		} else {
 			isClipSelected = true;

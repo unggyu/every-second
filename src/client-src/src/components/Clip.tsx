@@ -19,7 +19,8 @@ let styles = (theme: Theme) => ({
 });
 
 interface IClipProps extends WithStyles<typeof styles> {
-    title: string;
+    className?: string;
+    title?: string;
     clip?: ProjectItem;
 }
 
@@ -35,29 +36,36 @@ class Clip extends Component<IClipProps> {
     render() {
         if (this.props.clip !== undefined) {
             const {
+                className,
+                title
+            } = this.props;
+
+            const {
                 name,
                 nodeId
             } = this.props.clip;
 
             return (
-                <Card className={this.classes.root}>
-                    <CardContent>
-                        <Typography
-                            className={this.classes.title}
-                            color="textSecondary"
-                            gutterBottom>
-                            {this.props.title}
-                        </Typography>
-                        <Typography variant="h5" component="h2">
-                            {name}
-                        </Typography>
-                        <Tooltip title="Node Id">
-                            <Typography color="textSecondary">
-                                {nodeId}
+                <div className={className}>
+                    <Card className={this.classes.root}>
+                        <CardContent>
+                            <Typography
+                                className={this.classes.title}
+                                color="textSecondary"
+                                gutterBottom>
+                                {title ?? 'clip'}
                             </Typography>
-                        </Tooltip>
-                    </CardContent>
-                </Card>
+                            <Typography variant="h5" component="h2">
+                                {name}
+                            </Typography>
+                            <Tooltip title="Node Id">
+                                <Typography color="textSecondary">
+                                    {nodeId}
+                                </Typography>
+                            </Tooltip>
+                        </CardContent>
+                    </Card>
+                </div>
             );
         } else {
             return (
