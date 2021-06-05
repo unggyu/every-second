@@ -383,4 +383,4 @@ $._EST_ = {
 // $._EST_.isClipSelectedInternalTest();
 // $._EST_.getSelectedClipInternal();
 // $._EST_.isEditableTest();
-$._EST_.startEditTest();
+// $._EST_.startEditTest();
