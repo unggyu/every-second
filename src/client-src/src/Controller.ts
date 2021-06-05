@@ -43,12 +43,12 @@ class Controller {
         return this._session;
     }
 
-    public alert(message: IAlertParameter['message'], decorator: IAlertParameter['decorator']): Promise<IScriptResultPayload> {
+    public async alert(message: IAlertParameter['message'], decorator: IAlertParameter['decorator']): Promise<void> {
         if (!this.hasSession()) {
             throw new SessionNotExistsError(this);
         }
 
-        return this.session.alert({
+        await this.session.alert({
             message: message,
             decorator: decorator
         });
@@ -68,28 +68,24 @@ class Controller {
             throw new SessionNotExistsError(this);
         }
 
-        var payload = await this.session.getSelectedClip();
-        var clip = payload.result;
-        if (clip === undefined) {
+        const payload = await this.session.getSelectedClip();
+        const clip = payload.result;
+        if (!clip) {
             throw new Error('result is undefined');
         }
         return clip;
     }
 
-    public async startEdit(param: IEverySecondEditData): Promise<IScriptResultPayload> {
+    public async startEdit(param: IEverySecondEditData): Promise<void> {
         if (!this.hasSession()) {
             throw new SessionNotExistsError(this);
         }
 
-        var isEditablePayload = await this.session.isEditable();
-        if (isEditablePayload.status === this.session.success && isEditablePayload.result !== undefined) {
-            if (isEditablePayload.result.isEditable) {
-                return this.session.startEdit(param);
-            } else {
-                throw new Error(isEditablePayload.result.reason);
-            }
+        const isEditablePayload = await this.session.isEditable();
+        if (isEditablePayload.result?.isEditable) {
+            await this.session.startEdit(param);
         } else {
-            throw new Error(JSON.stringify(isEditablePayload.error));
+            throw new Error(isEditablePayload.result?.reason);
         }
     }
 
