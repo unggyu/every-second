@@ -5,7 +5,9 @@ import {
     FormGroup,
     FormControlLabel,
     Checkbox,
-    Typography
+    Typography,
+    Slider,
+    Grid
 } from '@material-ui/core/index';
 import {
     Theme,
@@ -15,6 +17,7 @@ import {
 } from '@material-ui/core/styles/index';
 import Clip from './components/Clip';
 import Controller, { IEverySecondEditData } from './Controller';
+import Input from '@material-ui/core/Input';
 
 let styles = ((theme: Theme) => createStyles({
     root: {
@@ -50,6 +53,8 @@ interface IAppState extends IEverySecondEditData {
 class App extends Component<IAppProps, IAppState> {
     private controller: Controller;
     private classes: IAppProps['classes'];
+    private minInterval: number;
+    private maxInterval: number;
 
     constructor(props: IAppProps) {
         super(props);
@@ -64,10 +69,13 @@ class App extends Component<IAppProps, IAppState> {
 
         this.controller = props.controller;
         this.classes = props.classes;
+        this.minInterval = 0.1;
+        this.maxInterval = 100;
 
         this.checkSelectedClip = this.checkSelectedClip.bind(this);
         this.handleStartEditClick = this.handleStartEditClick.bind(this);
-        this.handleIntervalChange = this.handleIntervalChange.bind(this);
+        this.handleIntervalSliderChange = this.handleIntervalSliderChange.bind(this);
+        this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
         this.handleinjectCountChange = this.handleinjectCountChange.bind(this);
         this.handleUntilEndOfClipChange = this.handleUntilEndOfClipChange.bind(this);
         this.handleTrimEndChange = this.handleTrimEndChange.bind(this);
@@ -106,6 +114,16 @@ class App extends Component<IAppProps, IAppState> {
         return str.replace(/[^0-9]/g, '');
     }
 
+    private trimInterval(interval: number): number {
+        if (interval < this.minInterval) {
+            interval = this.minInterval;
+        } else if (interval > this.maxInterval) {
+            interval = this.maxInterval;
+        }
+
+        return interval;
+    }
+
     private handleStartEditClick = async (): Promise<void> => {
         try {
             const result = await this.controller.startEdit(this.state);
@@ -117,10 +135,28 @@ class App extends Component<IAppProps, IAppState> {
         }
     }
 
-    private handleIntervalChange(e: ChangeEvent<HTMLInputElement>) {
-        const onlyNums = this.removeNotNumbers(e.target.value);
+    private handleIntervalSliderChange(event: ChangeEvent<{}>, newValue: number | number[]) {
+        if (typeof newValue === 'object') {
+            newValue = newValue[0];
+        }
+
+        newValue = this.trimInterval(newValue);
+
         this.setState({
-            interval: +onlyNums
+            interval: newValue
+        });
+    }
+
+    private handleIntervalInputChange(event: ChangeEvent<HTMLInputElement>) {
+        const {
+            value
+        } = event.target;
+
+        let interval = value === '' ? this.minInterval : Number(value);
+        interval = this.trimInterval(interval);
+
+        this.setState({
+            interval: interval
         });
     }
 
@@ -163,10 +199,35 @@ class App extends Component<IAppProps, IAppState> {
                             Clip not selected
                         </Typography>
                     )}
-                    <TextField
+                    <div>
+                        <Typography id="interval-input-slider" color="textPrimary" gutterBottom>
+                            Gap between clips (seconds)
+                        </Typography>
+                        <Grid container spacing={2} alignItems="center">
+                            <Grid item xs>
+                                <Slider
+                                    value={interval}
+                                    onChange={this.handleIntervalSliderChange}
+                                    aria-labelledby="interval-input-slider" />
+                            </Grid>
+                            <Grid item>
+                                <Input
+                                    value={interval}
+                                    margin="dense"
+                                    onChange={this.handleIntervalInputChange}
+                                    inputProps={{
+                                        min: this.minInterval,
+                                        max: this.maxInterval,
+                                        type: 'number',
+                                        'aria-labelledby': 'interval-input-slider'
+                                    }} />
+                            </Grid>
+                        </Grid>
+                    </div>
+                    {/* <TextField
                         label="Gap between clips (seconds)"
                         onChange={this.handleIntervalChange}
-                        value={interval} />
+                        value={interval} /> */}
                     <TextField
                         label="Number of clips to inject"
                         disabled={untilEndOfClip}
