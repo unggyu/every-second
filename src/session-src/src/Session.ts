@@ -29,7 +29,7 @@ interface IAlertParameter {
 
 interface IStartEditParameter {
     /**
-     * Gap between clips (seconds)
+     * Gap between clips (milliseconds)
      */
     interval: number;
 

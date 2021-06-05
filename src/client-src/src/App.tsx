@@ -65,7 +65,7 @@ class App extends Component<IAppProps, IAppState> {
         super(props);
 
         this.state = {
-            interval: 1,
+            interval: 1000,
             injectCount: 0,
             untilEndOfClip: true,
             trimEnd: true,
@@ -75,8 +75,8 @@ class App extends Component<IAppProps, IAppState> {
 
         this.controller = props.controller;
         this.classes = props.classes;
-        this.minInterval = 0.1;
-        this.maxInterval = 100;
+        this.minInterval = 1;
+        this.maxInterval = 100000;
         this.minInjectCount = 0;
         this.maxInjectCount = 100;
 
@@ -271,12 +271,15 @@ class App extends Component<IAppProps, IAppState> {
                     )}
                     <div>
                         <Typography id="interval-input-slider" color="textPrimary" gutterBottom>
-                            Gap between clips (seconds)
+                            Gap between clips (milliseconds)
                         </Typography>
                         <Grid container spacing={2} alignItems="center">
                             <Grid item xs>
                                 <Slider
                                     value={interval}
+                                    min={0}
+                                    max={this.maxInterval}
+                                    step={1000}
                                     onChange={this.handleIntervalSliderChange}
                                     aria-labelledby="interval-input-slider" />
                             </Grid>
@@ -302,6 +305,8 @@ class App extends Component<IAppProps, IAppState> {
                             <Grid item xs>
                                 <Slider
                                     value={injectCount}
+                                    min={this.minInjectCount}
+                                    max={this.maxInjectCount}
                                     onChange={this.handleInjectCountSliderChange}
                                     disabled={untilEndOfClip}
                                     aria-labelledby="inject-count-input-slider" />

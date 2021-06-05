@@ -211,20 +211,19 @@ $._ES_ = {
 			// Enable qe to use the qe object
 			app.enableQE();
 			var videoTracks = app.project.activeSequence.videoTracks;
-			
+			var qeClip = qe.source.clip;
+			// Find and inject the same clip as qeclip
+			var clip = $._ES_.getClipInternal(qeClip.name);
+			if (!clip) {
+				throw new Error('Clip not found');
+			}
+
 			// Finding the number of tracks needed to inject a clip
-			var endTime = 0;
-			var endTick = 0;
-			var trackCountToAdd;
+			var endMilliseconds, trackCountToAdd;
 			if (param.untilEndOfClip) {
-				var qeClip = qe.source.clip;
-				var frameRate = Math.round(qeClip.videoFrameRate);
-				var hmst = qeClip.duration.split(':');
-				endTime += hmst[0] * 60 * 60; // hour
-				endTime += hmst[1] * 60;	  // minute
-				endTime += hmst[2] * 1;		  // second
-				endTick = TIME_COEFFICIENT * endTime;
-				trackCountToAdd = parseInt(endTime / param.interval) - videoTracks.numTracks;
+				var outPoint = clip.getOutPoint();
+				endMilliseconds = outPoint.seconds * 1000;
+				trackCountToAdd = Math.ceil(endMilliseconds / param.interval) - videoTracks.numTracks;
 			} else {
 				trackCountToAdd = param.injectCount - videoTracks.numTracks;
 			}
@@ -236,35 +235,28 @@ $._ES_ = {
 				activeQeSeq.addTracks(1);
 			}
 
-			// Find and inject the same clip as qeclip
-			var clip = $._ES_.getClipInternal(qe.source.clip.name);
-
-			if (clip === undefined) {
-				throw new Error('Clip not found');
-			}
-
-			var currentTime = 0;
+			var currentMilliseconds = 0;
 			if (param.untilEndOfClip) {
 				// injection till the end of the video
-				for (var i = 0; currentTime < endTime; i++) {
-					if (param.trimEnd && currentTime !== 0) {
+				for (var i = 0; currentMilliseconds < endMilliseconds; i++) {
+					if (param.trimEnd && currentMilliseconds !== 0) {
 						var outPoint = clip.getOutPoint();
-						outPoint.seconds -= param.interval;
+						outPoint.seconds -= param.interval / 1000;
 						clip.setOutPoint(outPoint, 4);
 					}
-					videoTracks[i].insertClip(clip, currentTime);
-					currentTime += param.interval;
+					videoTracks[i].insertClip(clip, currentMilliseconds / 1000);
+					currentMilliseconds += param.interval;
 				}
 			} else {
 				// Inject as many as the number of injections entered as parameters
 				for (var i = 0; i < param.injectCount; i++) {
-					if (param.trimEnd && currentTime !== 0) {
+					if (param.trimEnd && currentMilliseconds !== 0) {
 						var outPoint = clip.getOutPoint();
-						outPoint.seconds -= param.interval;
+						outPoint.seconds -= param.interval / 1000;
 						clip.setOutPoint(outPoint, 4);
 					}
-					videoTracks[i].insertClip(clip, currentTime);
-					currentTime += param.interval;
+					videoTracks[i].insertClip(clip, currentMilliseconds / 1000);
+					currentMilliseconds += param.interval;
 				}
 			}
 			clip.clearOutPoint();
@@ -374,8 +366,8 @@ $._EST_ = {
 	startEditTest: function() {
 		try {
 			var result = $._ES_.startEdit({
-				interval: 1,
-				injectCount: 0,
+				interval: 3000,
+				injectCount: 10,
 				untilEndOfClip: true,
 				trimEnd: true
 			});
@@ -391,4 +383,4 @@ $._EST_ = {
 // $._EST_.isClipSelectedInternalTest();
 // $._EST_.getSelectedClipInternal();
 // $._EST_.isEditableTest();
-// $._EST_.startEditTest();
+$._EST_.startEditTest();
