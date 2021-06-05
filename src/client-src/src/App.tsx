@@ -55,6 +55,8 @@ class App extends Component<IAppProps, IAppState> {
     private classes: IAppProps['classes'];
     private minInterval: number;
     private maxInterval: number;
+    private minInjectCount: number;
+    private maxInjectCount: number;
 
     constructor(props: IAppProps) {
         super(props);
@@ -71,12 +73,17 @@ class App extends Component<IAppProps, IAppState> {
         this.classes = props.classes;
         this.minInterval = 0.1;
         this.maxInterval = 100;
+        this.minInjectCount = 0;
+        this.maxInjectCount = 100;
 
         this.checkSelectedClip = this.checkSelectedClip.bind(this);
+        this.trimInterval = this.trimInterval.bind(this);
+        this.trimInjectCount = this.trimInjectCount.bind(this);
         this.handleStartEditClick = this.handleStartEditClick.bind(this);
         this.handleIntervalSliderChange = this.handleIntervalSliderChange.bind(this);
         this.handleIntervalInputChange = this.handleIntervalInputChange.bind(this);
-        this.handleinjectCountChange = this.handleinjectCountChange.bind(this);
+        this.handleInjectCountSliderChange = this.handleInjectCountSliderChange.bind(this);
+        this.handleInjectCountInputChange = this.handleInjectCountInputChange.bind(this);
         this.handleUntilEndOfClipChange = this.handleUntilEndOfClipChange.bind(this);
         this.handleTrimEndChange = this.handleTrimEndChange.bind(this);
     }
@@ -124,6 +131,16 @@ class App extends Component<IAppProps, IAppState> {
         return interval;
     }
 
+    private trimInjectCount(injectCount: number): number {
+        if (injectCount < this.minInjectCount) {
+            injectCount = this.minInjectCount
+        } else if (injectCount > this.maxInjectCount) {
+            injectCount = this.maxInjectCount;
+        }
+
+        return injectCount;
+    }
+
     private handleStartEditClick = async (): Promise<void> => {
         try {
             const result = await this.controller.startEdit(this.state);
@@ -160,22 +177,48 @@ class App extends Component<IAppProps, IAppState> {
         });
     }
 
-    private handleinjectCountChange(e: ChangeEvent<HTMLInputElement>) {
-        const onlyNums = this.removeNotNumbers(e.target.value);
+    private handleInjectCountSliderChange(event: ChangeEvent<{}>, newValue: number | number[]) {
+        if (typeof newValue === 'object') {
+            newValue = newValue[0];
+        }
+
+        newValue = this.trimInjectCount(newValue);
+
         this.setState({
-            injectCount: +onlyNums
+            injectCount: newValue
+        });
+    }
+
+    private handleInjectCountInputChange(event: ChangeEvent<HTMLInputElement>) {
+        const {
+            value
+        } = event.target;
+
+        let injectCount = value === '' ? this.minInjectCount : Number(value);
+        injectCount = this.trimInjectCount(injectCount);
+
+        this.setState({
+            injectCount: injectCount
         });
     }
 
     private handleUntilEndOfClipChange(e: ChangeEvent<HTMLInputElement>) {
+        const {
+            checked
+        } = e.target;
+
         this.setState({
-            untilEndOfClip: e.target.checked
+            untilEndOfClip: checked
         });
     }
 
     private handleTrimEndChange(e: ChangeEvent<HTMLInputElement>) {
+        const {
+            checked
+        } = e.target;
+
         this.setState({
-            trimEnd: e.target.checked
+            trimEnd: checked
         });
     }
 
@@ -224,15 +267,33 @@ class App extends Component<IAppProps, IAppState> {
                             </Grid>
                         </Grid>
                     </div>
-                    {/* <TextField
-                        label="Gap between clips (seconds)"
-                        onChange={this.handleIntervalChange}
-                        value={interval} /> */}
-                    <TextField
-                        label="Number of clips to inject"
-                        disabled={untilEndOfClip}
-                        onChange={this.handleinjectCountChange}
-                        value={injectCount} />
+                    <div>
+                        <Typography id="inject-count-input-slider" color="textPrimary" gutterBottom>
+                            Number of clips to inject
+                        </Typography>
+                        <Grid container spacing={2} alignItems="center">
+                            <Grid item xs>
+                                <Slider
+                                    value={injectCount}
+                                    onChange={this.handleInjectCountSliderChange}
+                                    disabled={untilEndOfClip}
+                                    aria-labelledby="inject-count-input-slider" />
+                            </Grid>
+                            <Grid item>
+                                <Input
+                                    value={injectCount}
+                                    margin="dense"
+                                    onChange={this.handleInjectCountInputChange}
+                                    disabled={untilEndOfClip}
+                                    inputProps={{
+                                        min: this.minInjectCount,
+                                        max: this.maxInjectCount,
+                                        type: 'number',
+                                        'aria-labelledby': 'inject-count-input-slider'
+                                    }} />
+                            </Grid>
+                        </Grid>
+                    </div>
                     <FormGroup>
                         <FormControlLabel
                             label={<Typography className={this.classes.label}>Until end of clip</Typography>}
