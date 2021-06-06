@@ -159,6 +159,11 @@ class Session {
         return this.evalFunction(functionName);
     }
 
+    public getClipOutPointSecondsByNodeId(nodeId: string): Promise<IScriptResultPayload<number>> {
+        const functionName = this.attachPrefix('getClipOutPointSecondsByNodeId');
+        return this.evalFunction(functionName, nodeId);
+    }
+
     public isEditable(): Promise<IScriptResultPayload<IIsEditableResult>> {
         const functionName = this.attachPrefix('isEditable');
         return this.evalFunction(functionName);

@@ -43,6 +43,10 @@ interface IAppProps extends WithStyles<typeof styles> {
 interface IAppState {
     isClipSelected: boolean;
     selectedClip?: ProjectItem;
+    intervalRange: {
+        min: number,
+        max: number
+    };
     canEdit: boolean;
     editData: IEverySecondEditData;
 }
@@ -56,8 +60,6 @@ class App extends Component<IAppProps, IAppState> {
     private classes: IAppProps['classes'];
     private checkSelectedClipTimeout: NodeJS.Timeout;
     private checkSelectedClipChangedTimeout: NodeJS.Timeout;
-    private minInterval: number;
-    private maxInterval: number;
     private minInjectCount: number;
     private maxInjectCount: number;
 
@@ -66,6 +68,10 @@ class App extends Component<IAppProps, IAppState> {
 
         this.state = {
             isClipSelected: false,
+            intervalRange: {
+                min: 1,
+                max: 100000
+            },
             canEdit: false,
             editData: {
                 interval: 1000,
@@ -77,13 +83,13 @@ class App extends Component<IAppProps, IAppState> {
 
         this.controller = props.controller;
         this.classes = props.classes;
-        this.minInterval = 1;
-        this.maxInterval = 100000;
         this.minInjectCount = 0;
         this.maxInjectCount = 100;
 
         this.checkSelectedClip = this.checkSelectedClip.bind(this);
         this.checkSelectedClipChanged = this.checkSelectedClipChanged.bind(this);
+        this.determineIfCanEdit = this.determineIfCanEdit.bind(this);
+        this.getIntervalRangeByOutPointSeconds = this.getIntervalRangeByOutPointSeconds.bind(this);
         this.trimInterval = this.trimInterval.bind(this);
         this.trimInjectCount = this.trimInjectCount.bind(this);
         this.handleStartEditClick = this.handleStartEditClick.bind(this);
@@ -100,6 +106,16 @@ class App extends Component<IAppProps, IAppState> {
         this.checkSelectedClipTimeout = setInterval(this.checkSelectedClip, 1000);
     }
 
+    public componentDidUpdate() {
+        const { canEdit } = this.state;
+        const newCanEdit = this.determineIfCanEdit();
+        if (newCanEdit !== canEdit) {
+            this.setState({
+                canEdit: newCanEdit
+            });
+        }
+    }
+
     public componentWillUnmount() {
         clearInterval(this.checkSelectedClipTimeout);
         clearInterval(this.checkSelectedClipChangedTimeout);
@@ -109,19 +125,19 @@ class App extends Component<IAppProps, IAppState> {
         try {
             const isSelected = await this.controller.isClipSelected();
             if (isSelected !== this.state.isClipSelected) {
-                this.setState({
-                    isClipSelected: isSelected,
-                    canEdit: isSelected
-                });
-
                 if (isSelected) {
-                    var clip = await this.controller.getSelectedClip();
+                    const clip = await this.controller.getSelectedClip();
+                    const outPointSeconds = await this.controller.getClipOutPointSecondsByNodeId(clip.nodeId);
+                    const intervalRange = this.getIntervalRangeByOutPointSeconds(outPointSeconds);
                     this.setState({
-                        selectedClip: clip
+                        isClipSelected: isSelected,
+                        selectedClip: clip,
+                        intervalRange: intervalRange
                     });
                     this.checkSelectedClipChangedTimeout = setInterval(this.checkSelectedClipChanged, 1000);
                 } else {
                     this.setState({
+                        isClipSelected: isSelected,
                         selectedClip: undefined 
                     });
                     clearInterval(this.checkSelectedClipChangedTimeout);
@@ -149,11 +165,29 @@ class App extends Component<IAppProps, IAppState> {
         }
     }
 
+    private determineIfCanEdit(): boolean {
+        const { isClipSelected } = this.state;
+        const { injectCount, untilEndOfClip } = this.state.editData;
+        if (untilEndOfClip) {
+            return isClipSelected;
+        } else {
+            return isClipSelected && injectCount !== 0;
+        }
+    }
+
+    private getIntervalRangeByOutPointSeconds(seconds: number): IAppState['intervalRange'] {
+        const currentRange = this.state.intervalRange;
+        currentRange['max'] = seconds * 1000;
+        return currentRange;
+    }
+
     private trimInterval(interval: number): number {
-        if (interval < this.minInterval) {
-            interval = this.minInterval;
-        } else if (interval > this.maxInterval) {
-            interval = this.maxInterval;
+        const { min, max } = this.state.intervalRange;
+
+        if (interval < min) {
+            interval = min;
+        } else if (interval > max) {
+            interval = max;
         }
 
         return interval;
@@ -194,11 +228,10 @@ class App extends Component<IAppProps, IAppState> {
     }
 
     private handleIntervalInputChange(event: ChangeEvent<HTMLInputElement>) {
-        const {
-            value
-        } = event.target;
+        const { value} = event.target;
+        const { min } = this.state.intervalRange;
 
-        let interval = value === '' ? this.minInterval : Number(value);
+        let interval = value === '' ? min : Number(value);
         interval = this.trimInterval(interval);
         const currentEditData = this.state.editData;
         currentEditData['interval'] = interval;
@@ -296,7 +329,7 @@ class App extends Component<IAppProps, IAppState> {
                                 <Slider
                                     value={interval}
                                     min={0}
-                                    max={this.maxInterval}
+                                    max={this.state.intervalRange.max}
                                     step={1000}
                                     onChange={this.handleIntervalSliderChange}
                                     aria-labelledby="interval-input-slider" />
@@ -307,8 +340,8 @@ class App extends Component<IAppProps, IAppState> {
                                     margin="dense"
                                     onChange={this.handleIntervalInputChange}
                                     inputProps={{
-                                        min: this.minInterval,
-                                        max: this.maxInterval,
+                                        min: this.state.intervalRange.min,
+                                        max: this.state.intervalRange.max,
                                         type: 'number',
                                         'aria-labelledby': 'interval-input-slider'
                                     }} />

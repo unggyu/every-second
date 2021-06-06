@@ -66,16 +66,17 @@ $._ES_ = {
 
 		return stringify(payload);
 	},
-	getClip: function(name) {
+	getClipByName: function(name) {
 		var payload = {};
 
 		try {
-			var clip = $._ES_.getClipInternal(name);
-			if (clip === undefined) {
-				throw new Error('\'' + name + '\' clip not found');
-			} else {
+			var clip = $._ES_.getClipByNameInternal(name);
+			if (clip) {
 				payload.result = clip;
+			} else {
+				throw new Error('\'' + name + '\' clip not found');
 			}
+			payload.status = SUCCESS;
 		} catch (err) {
 			payload.status = FAILURE;
 			payload.error = err;
@@ -83,16 +84,63 @@ $._ES_ = {
 
 		return stringify(payload);
 	},
-	getClipInternal: function(name) {
+	getClipByNameInternal: function(name) {
 		var clip;
-		var clipCollection = app.project.rootItem.children;
-		for (var i = 0; i < clipCollection.numItems; i++) {
-			if (clipCollection[i].name === name) {
-				clip = clipCollection[i];
+		var clips = app.project.rootItem.children;
+		for (var i = 0; i < clips.numItems; i++) {
+			if (clips[i].name === name) {
+				clip = clips[i];
 			}
 		}
 
 		return clip;
+	},
+	getClipByNodeId: function(nodeId) {
+		var payload = {};
+
+		try {
+			var clip = $._ES_.getClipByNodeIdInternal(nodeId);
+			if (clip) {
+				payload.result = clip;
+			} else {
+				throw new Error('\'' + nodeId + '\' clip not found');
+			}
+			payload.status = SUCCESS;
+		} catch (err) {
+			payload.status = FAILURE;
+			payload.error = err;
+		}
+
+		return stringify(payload);
+	},
+	getClipByNodeIdInternal: function(nodeId) {
+		var clip;
+		var clips = app.project.rootItem.children;
+		for (var i = 0; i < clips.numItems; i++) {
+			if (clips[i].nodeId === nodeId) {
+				clip = clips[i];
+			}
+		}
+
+		return clip;
+	},
+	getClipOutPointSecondsByNodeId: function(nodeId) {
+		var payload = {};
+
+		try {
+			payload.result = $._ES_.getClipOutPointSecondsByNodeIdInternal(nodeId);
+			payload.status = SUCCESS;
+		} catch (err) {
+			payload.status = FAILURE;
+			payload.error = err;
+		}
+
+		return stringify(payload);
+	},
+	getClipOutPointSecondsByNodeIdInternal: function(nodeId) {
+		var clip = $._ES_.getClipByNodeIdInternal(nodeId);
+		var outPoint = clip.getOutPoint();
+		return outPoint.seconds;
 	},
 	isClipSelected: function() {
 		var payload = {};
@@ -125,7 +173,7 @@ $._ES_ = {
 		try {
 			app.enableQE();
 			var name = qe.source.clip.name;
-			var clip = $._ES_.getClipInternal(name);
+			var clip = $._ES_.getClipByNameInternal(name);
 			payload.result = clip;
 			payload.status = SUCCESS;
 		} catch (err) {
@@ -138,7 +186,7 @@ $._ES_ = {
 	getSelectedClipInternal: function() {
 		app.enableQE();
 		var name = qe.source.clip.name;
-		return $._ES_.getClipInternal(name);
+		return $._ES_.getClipByNameInternal(name);
 	},
 	isEditable: function() {
 		var payload = {};
@@ -213,7 +261,7 @@ $._ES_ = {
 			var videoTracks = app.project.activeSequence.videoTracks;
 			var qeClip = qe.source.clip;
 			// Find and inject the same clip as qeclip
-			var clip = $._ES_.getClipInternal(qeClip.name);
+			var clip = $._ES_.getClipByNameInternal(qeClip.name);
 			if (!clip) {
 				throw new Error('Clip not found');
 			}
@@ -339,10 +387,18 @@ $._EST_ = {
 			alert(JSON.stringify(err));
 		}
 	},
-	getClipInternalTest: function() {
+	getClipByNameInternalTest: function() {
 		try {
-			var result = $._ES_.getClipInternal('Shia LaBeouf  Just Do It  Motivational Speech (Original Video by LaBeouf, Rönkkö & Turner).mp4');
+			var result = $._ES_.getClipByNameInternal('Shia LaBeouf  Just Do It  Motivational Speech (Original Video by LaBeouf, Rönkkö & Turner).mp4');
 			alert(JSON.stringify(result.name));
+		} catch (err) {
+			alert(JSON.stringify(err));
+		}
+	},
+	getClipOutPointSecondsByNodeIdInternalTest: function() {
+		try {
+			var result = $._ES_.getClipOutPointSecondsByNodeIdInternal('000f4244');
+			alert(JSON.stringify(result));
 		} catch (err) {
 			alert(JSON.stringify(err));
 		}
@@ -379,8 +435,9 @@ $._EST_ = {
 }
 
 // $._EST_.testHostWithParamTest();
-// $._EST_.getClipInternalTest();
+// $._EST_.getClipByNameInternalTest();
 // $._EST_.isClipSelectedInternalTest();
+// $._EST_.getClipOutPointSecondsByNodeIdInternalTest();
 // $._EST_.getSelectedClipInternal();
 // $._EST_.isEditableTest();
 // $._EST_.startEditTest();
