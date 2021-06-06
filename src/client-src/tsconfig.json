@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es2018",
+        "module": "commonJs",
+        "jsx": "react",
+        "strict": true,
+        "strictPropertyInitialization": false,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "strictNullChecks": true,
+        "esModuleInterop": true,
+        "types": ["node", "types-for-adobe/Premiere/2018"]
+    },
+    "include": ["./src/**/*"]
+}

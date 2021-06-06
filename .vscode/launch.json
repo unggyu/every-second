@@ -8,8 +8,19 @@
             "type": "chrome",
             "request": "attach",
             "name": "Attach to Chrome",
+            "trace": true,
+            "address": "127.0.0.1",
             "port": 3006,
-            "webRoot": "${workspaceRoot}"
+            "disableNetworkCache": true,
+            "webRoot": "${workspaceRoot}",
+            "sourceMaps": true
+        },
+        {
+            "type": "extendscript-debug",
+            "request": "launch",
+            "name": "main.jsx",
+            "program": "${workspaceFolder}/src/host/main.jsx",
+            "stopOnEntry": false
         }
     ]
 }

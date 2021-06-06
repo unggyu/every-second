@@ -1,13 +1,14 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const pluginConfig = require('../pluginrc.js')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const pluginConfig = require('../pluginrc.js');
 // const distFolder = pluginConfig.destinationFolder
-const distFolder = path.join(pluginConfig.destinationFolder, pluginConfig.extensionBundleId)
-const srcFolder = pluginConfig.sourceFolder
-const CLIENT_DIST_PATH = path.resolve(distFolder, 'client-dist')
-const HTML_TEMPLATE_PATH = path.join(srcFolder, 'client-src/index.server.template.html')
-const ENTRY_POINT_CLIENT_PATH = path.join(srcFolder, 'client-src/index.js')
+const distFolder = path.join(pluginConfig.destinationFolder, pluginConfig.extensionBundleId);
+const srcFolder = pluginConfig.sourceFolder;
+const CLIENT_DIST_PATH = path.resolve(distFolder, 'client-dist');
+const HTML_TEMPLATE_PATH = path.join(srcFolder, 'client-src/index.server.template.html');
+const ENTRY_POINT_CLIENT_PATH = path.join(srcFolder, 'client-src/src/index.tsx');
 
 module.exports = ({
     entry: ENTRY_POINT_CLIENT_PATH,
@@ -15,13 +16,13 @@ module.exports = ({
     module: {
         rules: [
         {
-            test: /\.(js|jsx)$/,
+            test: /\.(ts|tsx)$/,
             exclude: /node_modules/,
-            loader: "babel-loader",
+            loader: 'babel-loader',
             options: {
-                presets: ['@babel/preset-env', '@babel/preset-react']
+                presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
+                plugins: ['@babel/plugin-transform-runtime']
             }
-
         },
         {
             test: /\.(woff|woff2|eot|ttf|svg)$/,
@@ -31,12 +32,22 @@ module.exports = ({
             }
         },
         {
-            test:/\.css$/,
-            use:[MiniCssExtractPlugin.loader,'css-loader']
+            test: /\.css$/,
+            use: [
+                {
+                    loader: MiniCssExtractPlugin.loader,
+                },
+                {
+                    loader: 'css-loader',
+                    options: {
+                        sourceMap: true
+                    }
+                }
+            ]
         }]
     },
     resolve: {
-        extensions: ['*', '.js', '.jsx']
+        extensions: ['.tsx', '.ts', '.js']
     },
     output: {
         path: CLIENT_DIST_PATH,
@@ -51,8 +62,8 @@ module.exports = ({
         new MiniCssExtractPlugin({
           // Options similar to the same options in webpackOptions.output
           // both options are optional https://github.com/webpack-contrib/mini-css-extract-plugin
-          filename: "[name].css",
-          chunkFilename: "[id].css"
+          filename: '[name].css',
+          chunkFilename: '[id].css'
         }),
         new HtmlWebpackPlugin({
             template: HTML_TEMPLATE_PATH,
@@ -60,6 +71,9 @@ module.exports = ({
             inject: 'body',
             title: 'HTML Webpack Plugin',
             bar: 'bar'
+        }),
+        new CleanWebpackPlugin({
+            cleanStaleWebpackAssets: false
         })
     ],
     stats: {
