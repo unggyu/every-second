@@ -41,10 +41,11 @@ interface IAppProps extends WithStyles<typeof styles> {
     controller: Controller;
 }
 
-interface IAppState extends IEverySecondEditData {
+interface IAppState {
     isClipSelected: boolean;
     selectedClip?: ProjectItem;
     canEdit: boolean;
+    editData: IEverySecondEditData;
 }
 
 /**
@@ -65,12 +66,14 @@ class App extends Component<IAppProps, IAppState> {
         super(props);
 
         this.state = {
-            interval: 1000,
-            injectCount: 0,
-            untilEndOfClip: true,
-            trimEnd: true,
             isClipSelected: false,
-            canEdit: false
+            canEdit: false,
+            editData: {
+                interval: 1000,
+                injectCount: 0,
+                untilEndOfClip: true,
+                trimEnd: true
+            }
         }
 
         this.controller = props.controller;
@@ -169,7 +172,7 @@ class App extends Component<IAppProps, IAppState> {
 
     private handleStartEditClick = async (): Promise<void> => {
         try {
-            const result = await this.controller.startEdit(this.state);
+            const result = await this.controller.startEdit(this.state.editData);
             console.log(result);
             this.controller.alert('Edit success', 'info');
         } catch (err) {
@@ -184,9 +187,11 @@ class App extends Component<IAppProps, IAppState> {
         }
 
         newValue = this.trimInterval(newValue);
+        const currentEditData = this.state.editData;
+        currentEditData['interval'] = newValue;
 
         this.setState({
-            interval: newValue
+            editData: currentEditData
         });
     }
 
@@ -197,9 +202,11 @@ class App extends Component<IAppProps, IAppState> {
 
         let interval = value === '' ? this.minInterval : Number(value);
         interval = this.trimInterval(interval);
+        const currentEditData = this.state.editData;
+        currentEditData['interval'] = interval;
 
         this.setState({
-            interval: interval
+            editData: currentEditData
         });
     }
 
@@ -209,9 +216,11 @@ class App extends Component<IAppProps, IAppState> {
         }
 
         newValue = this.trimInjectCount(newValue);
+        const currentEditData = this.state.editData;
+        currentEditData['injectCount'] = newValue;
 
         this.setState({
-            injectCount: newValue
+            editData: currentEditData
         });
     }
 
@@ -222,9 +231,11 @@ class App extends Component<IAppProps, IAppState> {
 
         let injectCount = value === '' ? this.minInjectCount : Number(value);
         injectCount = this.trimInjectCount(injectCount);
+        const currentEditData = this.state.editData;
+        currentEditData['injectCount'] = injectCount;
 
         this.setState({
-            injectCount: injectCount
+            editData: currentEditData
         });
     }
 
@@ -233,8 +244,11 @@ class App extends Component<IAppProps, IAppState> {
             checked
         } = e.target;
 
+        const currentEditData = this.state.editData;
+        currentEditData['untilEndOfClip'] = checked;
+
         this.setState({
-            untilEndOfClip: checked
+            editData: currentEditData
         });
     }
 
@@ -243,21 +257,27 @@ class App extends Component<IAppProps, IAppState> {
             checked
         } = e.target;
 
+        const currentEditData = this.state.editData;
+        currentEditData['trimEnd'] = checked;
+
         this.setState({
-            trimEnd: checked
+            editData: currentEditData
         });
     }
 
     render() {
         const {
-            interval,
-            injectCount,
-            untilEndOfClip,
-            trimEnd,
             isClipSelected,
             selectedClip,
             canEdit
         } = this.state;
+
+        const {
+            interval,
+            injectCount,
+            untilEndOfClip,
+            trimEnd
+        } = this.state.editData;
 
         return (
             <div className={this.classes.root}>
