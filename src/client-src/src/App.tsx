@@ -1,7 +1,6 @@
 import React, { Component, ChangeEvent } from 'react';
 import {
     Button,
-    TextField,
     FormGroup,
     FormControlLabel,
     Checkbox,
@@ -106,7 +105,7 @@ class App extends Component<IAppProps, IAppState> {
         clearInterval(this.checkSelectedClipChangedTimeout);
     }
 
-    private async checkSelectedClip() {
+    private async checkSelectedClip(): Promise<void> {
         try {
             const isSelected = await this.controller.isClipSelected();
             if (isSelected !== this.state.isClipSelected) {
@@ -129,11 +128,11 @@ class App extends Component<IAppProps, IAppState> {
                 }
             }
         } catch (err) {
-            this.controller.alert(err, 'error');
+            await this.controller.alert(err, 'error');
         }
     }
 
-    private async checkSelectedClipChanged() {
+    private async checkSelectedClipChanged(): Promise<void> {
         try {
             const clip = await this.controller.getSelectedClip();
             const {
@@ -146,7 +145,7 @@ class App extends Component<IAppProps, IAppState> {
                 });
             }
         } catch (err) {
-            this.controller.alert(err, 'error');
+            await this.controller.alert(err, 'error');
         }
     }
 
@@ -172,12 +171,11 @@ class App extends Component<IAppProps, IAppState> {
 
     private handleStartEditClick = async (): Promise<void> => {
         try {
-            const result = await this.controller.startEdit(this.state.editData);
-            console.log(result);
-            this.controller.alert('Edit success', 'info');
+            await this.controller.startEdit(this.state.editData);
+            await this.controller.alert('Edit success', 'info');
         } catch (err) {
             console.error(err);
-            this.controller.alert(err.message, 'error');
+            await this.controller.alert(err.message, 'error');
         }
     }
 
