@@ -76,6 +76,19 @@ class Controller {
         return clip;
     }
 
+    public async getClipOutPointSecondsByNodeId(nodeId: string): Promise<number> {
+        if (!this.hasSession()) {
+            throw new SessionNotExistsError(this);
+        }
+
+        const payload = await this.session.getClipOutPointSecondsByNodeId(nodeId);
+        const seconds = payload.result;
+        if (!seconds) {
+            throw new Error('reuslt is undefined');
+        }
+        return seconds;
+    }
+
     public async startEdit(param: IEverySecondEditData): Promise<void> {
         if (!this.hasSession()) {
             throw new SessionNotExistsError(this);
