@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import Controller from './Controller';
-import { ScriptLoader, Session } from '../../session-src/src';
+import { ScriptLoader, Session } from '../../session/src';
 import '../assets/css/style.css';
 import '../assets/fonts/typeface-roboto/index.css';
 import '../assets/fonts/material-icons/index.css';

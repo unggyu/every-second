@@ -4,8 +4,8 @@ const nodeExternals = require('webpack-node-externals');
 const pluginConfig = require('../pluginrc.js')
 const distFolder = path.join(pluginConfig.destinationFolder, pluginConfig.extensionBundleId)
 const srcFolder = pluginConfig.sourceFolder
-const SESSION_DIST_PATH = path.join(distFolder, 'session-dist')
-const SESSION_SRC_PATH = path.join(srcFolder, 'session-src')
+const SESSION_DIST_PATH = path.join(distFolder, 'session')
+const SESSION_SRC_PATH = path.join(srcFolder, 'session')
 const ENTRY_POINT_SESSION_PATH = path.join(SESSION_SRC_PATH, 'src/index.ts')
 
 module.exports = (env) => ({

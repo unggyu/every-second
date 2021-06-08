@@ -54,8 +54,8 @@ function build() {
         utils.copyRecursiveSync(fromSrc('host'), fromPlugin('host'))
         // copy the session's node modules folder
         utils.log_progress('copying session node-modules...')
-        utils.mkdir(fromSrc('session-src/node_modules'));
-        utils.copyRecursiveSync(fromSrc('session-src/node_modules'), fromPlugin('node_modules'))
+        utils.mkdir(fromSrc('session/node_modules'));
+        utils.copyRecursiveSync(fromSrc('session/node_modules'), fromPlugin('node_modules'))
         // copying libs folder
         utils.log_progress('copying libs folder...')
         utils.copyRecursiveSync(fromSrc('libs'), fromPlugin('libs'))

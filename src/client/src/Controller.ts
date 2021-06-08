@@ -1,4 +1,4 @@
-import { Session, IStartEditParameter, IScriptResultPayload, IAlertParameter } from '../../session-src/src/index';
+import { Session, IStartEditParameter, IScriptResultPayload, IAlertParameter } from '../../session/src/index';
 
 declare global {
     interface Window {
