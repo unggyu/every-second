@@ -16,15 +16,15 @@ const zxpFile = path.join(distFolder, pluginConfig.extensionBundleId + '.zxp')
 archive()
 
 function archive() {
-    utils.log_progress('ARCHIVE', 'blue')
+    utils.log_progress('ARCHIVE', 'blue');
 
     prepareCert()
-    .then(signPackage)
-    .then(res => {
-        utils.log_progress(`package is signed: ${zxpFile}`, 'green')
-        utils.log_progress('DONE', 'blue')
-    })
-    .catch(err => {utils.log_error(err)})
+        .then(signPackage)
+        .then((res) => {
+            utils.log_progress(`package is signed: ${zxpFile}`, 'green')
+            utils.log_progress('DONE', 'blue')
+        })
+        .catch((err) => utils.log_error(err));
 }
 
 /**
@@ -59,25 +59,21 @@ function prepareCert() {
 
     return new Promise((resolve, reject) => {
         if(!isValid) {
-            reject('no valid cert info')
-
-            return
+            reject('no valid cert info');
+            return;
         }
 
         if(isCustom) {
-            utils.log_progress('found a custom certificate')
-            resolve(data)
+            utils.log_progress('found a custom certificate');
+            resolve(data);
         } else {
-            utils.log_progress('generating a self signed certificate')
-            zxpSignCmd.selfSignedCert(options_self_sign, function (error, result) {
-                if(error) reject(error)
-                else resolve(data)
-            })
-
+            utils.log_progress('generating a self signed certificate');
+            zxpSignCmd
+                .selfSignedCert(options_self_sign)
+                .then((res) => resolve(data))
+                .catch((err) => reject(err));
         }
-
-    })
-
+    });
 }
 
 /**
@@ -95,13 +91,5 @@ function signPackage(cert) {
         password: cert.password
     }
 
-    return new Promise((resolve, reject) => {
-        zxpSignCmd.sign(options, function (error, result) {
-            if(error) reject(error)
-            else resolve(result)
-
-        })
-
-    })
-
+    return zxpSignCmd.sign(options);
 }
