@@ -36,18 +36,18 @@ function prepareCert() {
     const options_custom_cert = certificate_options.customCert
     const options_self_sign = certificate_options.selfSign
     const isCustom = options_custom_cert && options_custom_cert.path.trim() !== ''
-    var path='', password=''
+    var path = '', password = '';
 
-    if(isCustom) {
+    if (isCustom) {
         path = options_custom_cert.path
         password = options_custom_cert.password
-    } else if(options_self_sign){
+    } else if (options_self_sign) {
         path = options_self_sign.output
         password = options_self_sign.password
     }
 
-    const isValid = path!==undefined && path.trim()!==''
-    const data = {path, password}
+    const isValid = path !== undefined && path.trim() !== '';
+    const data = { path, password }
 
     // on non windows, we need to change the permissions
     if(!isWindows) {

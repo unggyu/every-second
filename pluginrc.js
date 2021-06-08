@@ -1,4 +1,5 @@
 const path = require('path')
+const pass = require('./password.js');
 const root = __dirname
 const srcFolder = path.join(root, "src")
 const destFolder = path.join(root, "dist")
@@ -17,14 +18,14 @@ module.exports = {
     certificate : {
         customCert: {
             path: '',
-            password: 'password'
+            password: pass.password
         },
         selfSign: {
             country: 'KR',
             province: 'province',
             org: 'org',
             name: 'unggyu',
-            password: 'password',
+            password: pass.password,
             locality: 'locality',
             orgUnit: 'orgUnit',
             email: 'cdr982116@gmail.com',
