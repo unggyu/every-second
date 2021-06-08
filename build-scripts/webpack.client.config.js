@@ -6,9 +6,9 @@ const pluginConfig = require('../pluginrc.js');
 // const distFolder = pluginConfig.destinationFolder
 const distFolder = path.join(pluginConfig.destinationFolder, pluginConfig.extensionBundleId);
 const srcFolder = pluginConfig.sourceFolder;
-const CLIENT_DIST_PATH = path.resolve(distFolder, 'client-dist');
-const HTML_TEMPLATE_PATH = path.join(srcFolder, 'client-src/index.server.template.html');
-const ENTRY_POINT_CLIENT_PATH = path.join(srcFolder, 'client-src/src/index.tsx');
+const CLIENT_DIST_PATH = path.resolve(distFolder, 'client');
+const HTML_TEMPLATE_PATH = path.join(srcFolder, 'client/index.server.template.html');
+const ENTRY_POINT_CLIENT_PATH = path.join(srcFolder, 'client/src/index.tsx');
 
 module.exports = ({
     entry: ENTRY_POINT_CLIENT_PATH,

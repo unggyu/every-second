@@ -7,23 +7,11 @@ module.exports = (props) =>
                    ExtensionBundleName="${props.extensionBundleName}"
                    Version="${props.cepVersion}">
   <ExtensionList>
-    <Extension Id="${props.extensionBundleId}" Version="${props.extensionBundleVersion}">
-      <!-- <Host Name="PHXS" Port="8088"/>
-      <Host Name="PHSP" Port="8088"/> -->
-    </Extension>
+    <Extension Id="${props.extensionBundleId}" Version="${props.extensionBundleVersion}" />
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>
-        <Host Name="PHXS" Version="[0.0,99.9]" />
-        <Host Name="PHSP" Version="[0.0,99.9]" />
-        <Host Name="IDSN" Version="[0.0,99.9]" />
-        <Host Name="AICY" Version="[0.0,99.9]" />
-        <Host Name="ILST" Version="[0.0,99.9]" />
         <Host Name="PPRO" Version="[0.0,99.9]" />
-        <Host Name="AEFT" Version="[0.0,99.9]" />
-        <Host Name="PRLD" Version="[0.0,99.9]" />
-        <Host Name="FLPR" Version="[0.0,99.9]" />
-        <Host Name="DRWV" Version="[0.0,99.9]" />
     </HostList>
     <LocaleList>
       <Locale Code="All" />
