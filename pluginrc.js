@@ -7,8 +7,8 @@ const certPath = path.join(destFolder, "cert.p12")
 module.exports = {
     extensionBundleId: 'com.unggyu.everysecond',
     extensionBundleName: 'everysecond',
-    extensionBundleVersion: '1.0.1',
-    cepVersion: '10.0',
+    extensionBundleVersion: '1.0.0',
+    cepVersion: '9.0',
     panelName: 'EverySecond',
     width: '400',
     height: '600',
