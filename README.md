@@ -10,3 +10,5 @@
 ## Features
 - Set spacing between clips
 - Inject clips as many as you set
+- Insert clips as much as the length of the video
+- Trim the last part of all clips except the first one
