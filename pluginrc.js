@@ -28,7 +28,7 @@ module.exports = {
             password: pass.password,
             locality: 'locality',
             orgUnit: 'orgUnit',
-            email: 'cdr982116@gmail.com',
+            email: 'unggyu00@gmail.com',
             output: certPath
         }
     }
